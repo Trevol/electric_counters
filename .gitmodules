@@ -1,0 +1,3 @@
+[submodule "ultralytics_yolo"]
+	path = ultralytics_yolo
+	url = https://github.com/Trevol/yolov3.git
