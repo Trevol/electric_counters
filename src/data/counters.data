@@ -1,0 +1,4 @@
+classes=2
+train=data/train_split.txt
+valid=data/val_split.txt
+names=data/counters.names
