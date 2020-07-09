@@ -37,6 +37,6 @@ def convert():
     for yoloFile, yoloAnnotations in yoloFileAnnotations:
         with open(yoloFile, "wt") as f:
             for classId, cx, cy, w, h in yoloAnnotations:
-                f.write(f"{classId}, {cx}, {cy}, {w}, {h}\n")
+                f.write(f"{classId} {cx} {cy} {w} {h}\n")
 
 convert()
