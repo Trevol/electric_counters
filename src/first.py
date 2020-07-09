@@ -25,13 +25,22 @@ def preprocess(rgb, imSize):
     return img.unsqueeze(0)
 
 
+def load_weights(model, weights_path, device):
+    if weights_path.endswith('.pt'):  # if PyTorch format
+        model.load_state_dict(torch.load(weights_path, map_location=device)['model'])
+    elif weights_path.endswith('.weights'):  # darknet format
+        load_darknet_weights(model, weights_path)
+    else:
+        raise Exception("Unexpected weights extension " + weights_path)
+
+
 def test_detect():
     print("")
 
     # cfg_file = 'ultralytics_yolo/cfg/yolov3-spp.cfg'
     # weights_path = 'weights/yolov3-spp.pt'
     cfg_file = 'data/yolov3-tiny-2cls.cfg'
-    weights_path = 'weights/gpu_server/2/best.pt'
+    weights_path = 'weights/gpu_server/3/best.weights'
 
     # image_file = 'ultralytics_yolo/data/samples/zidane.jpg'
     # image_files = '/hdd/Datasets/counters/4_from_phone/*.jpg'
@@ -39,8 +48,8 @@ def test_detect():
     # image_files = '/home/trevol/hdd/Datasets/counters/7_from_app/*.jpg'
     # image_files = '/hdd/Datasets/counters/for_yolo/images/0_from_internet/train/*.jp*'
     # image_files = '/hdd/Datasets/counters/for_yolo/images/0_from_internet/val/*.jp*'
-    image_files = '/hdd/Datasets/counters/Musson_counters/train/*.jpg'
-    # image_files = '/hdd/Datasets/counters/Musson_counters/val/*.jpg'
+    # image_files = '/hdd/Datasets/counters/Musson_counters/train/*.jpg'
+    image_files = '/hdd/Datasets/counters/Musson_counters/val/*.jpg'
 
     imgsz = (416, 416)
     device = 'cpu'
@@ -48,8 +57,8 @@ def test_detect():
     iou_thres = .4
 
     model = Darknet(cfg_file, imgsz)
-    model.load_state_dict(torch.load(weights_path, map_location=device)['model'])
-    # load_darknet_weights(model, weights_path)
+    load_weights(model, weights_path, device)
+
     model.to(device).eval()
 
     def nms(predictions, conf_thres, iou_thres):
@@ -61,8 +70,6 @@ def test_detect():
         input = preprocess(img, imgsz).to(device)
 
         with torch.no_grad():
-            with timeit():
-                pred = model(input)[0]
             with timeit():
                 pred = model(input)[0]
 
@@ -86,6 +93,6 @@ def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
     cfg = 'data/yolov3-tiny-2cls.cfg'
-    weights_file = 'weights/gpu_server/2/best.pt'
+    weights_file = 'weights/gpu_server/3/best.pt'
 
     convert(cfg, weights_file)
