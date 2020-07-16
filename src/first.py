@@ -40,12 +40,12 @@ def test_detect():
     # cfg_file = 'ultralytics_yolo/cfg/yolov3-spp.cfg'
     # weights_path = 'weights/yolov3-spp.pt'
     cfg_file = 'data/yolov3-tiny-2cls.cfg'
-    weights_path = 'weights/gpu_server/4/best.weights'
+    weights_path = 'weights/gpu_server/5/best.weights'
 
     # image_file = 'ultralytics_yolo/data/samples/zidane.jpg'
-    # image_files = '/hdd/Datasets/counters/4_from_phone/*.jpg'
+    image_files = '/hdd/Datasets/counters/4_from_phone/*.jpg'
+    # image_files = '/home/trevol/hdd/Datasets/counters/7_from_app/*.jpg'
     # image_files = '/home/trevol/hdd/Datasets/counters/0_from_internet/all/*.jp*'
-    image_files = '/home/trevol/hdd/Datasets/counters/7_from_app/*.jpg'
     # image_files = '/hdd/Datasets/counters/for_yolo/images/0_from_internet/train/*.jp*'
     # image_files = '/hdd/Datasets/counters/for_yolo/images/0_from_internet/val/*.jp*'
     # image_files = '/hdd/Datasets/counters/Musson_counters/train/*.jpg'
@@ -93,6 +93,6 @@ def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
     cfg = 'data/yolov3-tiny-2cls.cfg'
-    weights_file = 'weights/gpu_server/4/best.pt'
+    weights_file = 'weights/best.pt'
 
     convert(cfg, weights_file)
