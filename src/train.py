@@ -8,6 +8,7 @@ from torch.utils.tensorboard import SummaryWriter
 import test  # import test.py to get mAP after each epoch
 from models import *
 from utils.datasets import *
+from utils2.path_utils import ensureRelativeToDir
 from utils.utils import *
 
 mixed_precision = True
@@ -54,6 +55,11 @@ if hyp['fl_gamma']:
     print('Using FocalLoss(gamma=%g)' % hyp['fl_gamma'])
 
 
+def image2label(img):
+    ext = os.path.splitext(img)[-1]
+    return img.replace(ext, '.txt')
+
+
 def train(hyp):
     cfg = opt.cfg
     data = opt.data
@@ -78,8 +84,10 @@ def train(hyp):
     # Configure run
     init_seeds()
     data_dict = parse_data_cfg(data)
-    train_path = data_dict['train']
-    test_path = data_dict['valid']
+    dataFileDirectory = Path(data).parent
+    train_path = ensureRelativeToDir(dataFileDirectory, data_dict['train'])
+    test_path = ensureRelativeToDir(dataFileDirectory, data_dict['valid'])
+
     nc = 1 if opt.single_cls else int(data_dict['classes'])  # number of classes
     hyp['cls'] *= nc / 80  # update coco-tuned hyp['cls'] to current dataset
 
@@ -190,7 +198,8 @@ def train(hyp):
                                   hyp=hyp,  # augmentation hyperparameters
                                   rect=opt.rect,  # rectangular training
                                   cache_images=opt.cache_images,
-                                  single_cls=opt.single_cls)
+                                  single_cls=opt.single_cls,
+                                  image2label=image2label)
 
     # Dataloader
     batch_size = min(batch_size, len(dataset))
@@ -207,7 +216,8 @@ def train(hyp):
                                                                  hyp=hyp,
                                                                  rect=True,
                                                                  cache_images=opt.cache_images,
-                                                                 single_cls=opt.single_cls),
+                                                                 single_cls=opt.single_cls,
+                                                                 image2label=image2label),
                                              batch_size=batch_size,
                                              num_workers=nw,
                                              pin_memory=True,
@@ -357,6 +367,7 @@ def train(hyp):
                          'optimizer': None if final_epoch else optimizer.state_dict()}
 
             # Save last, best and delete
+            os.makedirs(wdir, exist_ok=True)
             torch.save(chkpt, last)
             if (best_fitness == fi) and not final_epoch:
                 torch.save(chkpt, best)

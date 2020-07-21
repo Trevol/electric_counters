@@ -5,12 +5,14 @@ import cv2
 from trvo_utils.annotation import PascalVocXmlParser
 from trvo_utils.imutils import imSize
 
+from utils.utils import load_classes
+
 
 def convert():
-    labels = ["counter", "counter_screen"]
+    labels = load_classes("counter_digits/data/digits.names")
     vocDirs = [
-        "/home/trevol/hdd/Datasets/counters/Musson_counters/train",
-        "/home/trevol/hdd/Datasets/counters/Musson_counters/val"
+        "/hdd/Datasets/counters/Musson_counters/train/digits",
+        "/hdd/Datasets/counters/Musson_counters/val/digits/"
     ]
     yoloFileAnnotations = []
 
@@ -39,4 +41,6 @@ def convert():
             for classId, cx, cy, w, h in yoloAnnotations:
                 f.write(f"{classId} {cx} {cy} {w} {h}\n")
 
-convert()
+
+if __name__ == '__main__':
+    convert()

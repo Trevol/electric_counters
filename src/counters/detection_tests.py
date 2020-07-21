@@ -34,8 +34,7 @@ def load_weights(model, weights_path, device):
 
 
 def nms(predictions, conf_thres, iou_thres):
-    return non_max_suppression(predictions, conf_thres, iou_thres,
-                               multi_label=False, classes=None, agnostic=True)
+    return non_max_suppression(predictions, conf_thres, iou_thres, multi_label=False, classes=None, agnostic=True)
 
 
 def test_detect():
@@ -93,7 +92,7 @@ def test_detect():
 def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
-    cfg_file = 'data/yolov3-tiny-2cls-320.cfg'
+    cfg_file = 'data/counters/yolov3-tiny-2cls-320.cfg'
     weights_file = 'best_weights/yolov3-tiny-2cls/320/yolov3-tiny-2cls-320.pt'
 
     convert(cfg_file, weights_file)

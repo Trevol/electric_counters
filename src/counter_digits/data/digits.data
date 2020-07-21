@@ -1,0 +1,4 @@
+classes=10
+train=train_split.txt
+valid=val_split.txt
+names=digits.names
