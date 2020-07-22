@@ -6,6 +6,9 @@ from trvo_utils import toInt_array
 from trvo_utils.annotation import PascalVocXmlParser
 from trvo_utils.imutils import imshowWait
 
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import ElementTree
+
 
 def list_files(dirs, extensions):
     for d in dirs:
@@ -17,9 +20,10 @@ def list_files(dirs, extensions):
 
 
 def digitsAnnotationFile(imgFile):
+    annotations_dir = 'digits_annotations'
     parent, file_ = os.path.split(imgFile)
     nameWithoutExt = os.path.splitext(file_)[0]
-    ann_file = os.path.join(parent, 'digits_annotations', nameWithoutExt + '.xml')
+    ann_file = os.path.join(parent, annotations_dir, nameWithoutExt + '.xml')
     if os.path.isfile(ann_file):
         return ann_file
     return None
@@ -70,10 +74,6 @@ def show(screenImg, digitBoxes, digitLabels):
         raise Exception('End of show')
 
 
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import ElementTree
-
-
 def SubElement(parent, tag, text="", attrib={}):
     subEl = ET.SubElement(parent, tag, attrib)
     subEl.text = str(text or "")
@@ -101,7 +101,6 @@ def writeAnnotation(annFile, imgFile, imgShape, boxes, labels):
         SubElement(bndboxEl, 'ymin', y1)
         SubElement(bndboxEl, 'xmax', x2)
         SubElement(bndboxEl, 'ymax', y2)
-
 
     tree = ElementTree(element=root)
     tree.write(annFile)
@@ -136,8 +135,7 @@ def main():
     # extract rect with screen, adjust digits coords
     # save screen img and adjusted annotations to ./digits
     imagesDirs = [
-        "/hdd/Datasets/counters/Musson_counters/train/",
-        "/hdd/Datasets/counters/Musson_counters/val/"
+        "/hdd/Datasets/counters/1_from_phone/train",
     ]
     extract_dataset(imagesDirs)
 
