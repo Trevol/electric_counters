@@ -1,0 +1,3 @@
+- digits: auto-split to train/val
+    - generate train_split.txt and val_split.txt
+- digits: calc stats (count per digit)

@@ -136,6 +136,14 @@ def main():
     # save screen img and adjusted annotations to ./digits
     imagesDirs = [
         "/hdd/Datasets/counters/1_from_phone/train",
+        "/hdd/Datasets/counters/2_from_phone/train",
+        "/hdd/Datasets/counters/2_from_phone/val",
+        "/hdd/Datasets/counters/3_from_phone",
+        "/hdd/Datasets/counters/4_from_phone",
+        "/hdd/Datasets/counters/5_from_phone",
+        "/hdd/Datasets/counters/6_from_phone",
+        "/hdd/Datasets/counters/7_from_app",
+        "/hdd/Datasets/counters/8_from_phone"
     ]
     extract_dataset(imagesDirs)
 
