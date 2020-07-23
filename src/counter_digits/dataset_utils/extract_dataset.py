@@ -125,6 +125,8 @@ def extract_dataset(imagesDirs):
 
 def __main():
     imagesDirs = [
+        "/hdd/Datasets/counters/0_from_internet/train",
+        "/hdd/Datasets/counters/0_from_internet/val",
         "/hdd/Datasets/counters/1_from_phone/train",
         "/hdd/Datasets/counters/2_from_phone/train",
         "/hdd/Datasets/counters/2_from_phone/val",
