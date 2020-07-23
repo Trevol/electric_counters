@@ -1,5 +1,7 @@
-/hdd/Datasets/counters/Musson_counters/val/digits/000010.jpg
-/hdd/Datasets/counters/Musson_counters/val/digits/000014.jpg
+/hdd/Datasets/counters/4_from_phone/digits/P_20200517_155839.jpg
+/hdd/Datasets/counters/Musson_counters/train/digits/000034.jpg
+/hdd/Datasets/counters/Musson_counters/train/digits/000035.jpg
+/hdd/Datasets/counters/Musson_counters/train/digits/000036.jpg
+/hdd/Datasets/counters/Musson_counters/train/digits/000037.jpg
+/hdd/Datasets/counters/Musson_counters/train/digits/000038.jpg
 /hdd/Datasets/counters/Musson_counters/val/digits/000029.jpg
-/hdd/Datasets/counters/Musson_counters/val/digits/000021.jpg
-/hdd/Datasets/counters/Musson_counters/val/digits/000001.jpg

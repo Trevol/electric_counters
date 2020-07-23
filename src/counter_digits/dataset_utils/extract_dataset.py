@@ -61,19 +61,6 @@ def extract_screenImg_digitsAnnotations(img_file, ann_file):
     return screenImg, digitBoxes, digitLabels
 
 
-def drawBoxes(img, boxes, color):
-    for b in boxes:
-        x1, y1, x2, y2 = toInt_array(b)
-        cv2.rectangle(img, (x1, y1), (x2, y2), color, 1)
-    return img
-
-
-def show(screenImg, digitBoxes, digitLabels):
-    drawing = drawBoxes(screenImg.copy(), digitBoxes, (0, 255, 0))
-    if imshowWait(drawing) == 27:
-        raise Exception('End of show')
-
-
 def SubElement(parent, tag, text="", attrib={}):
     subEl = ET.SubElement(parent, tag, attrib)
     subEl.text = str(text or "")
@@ -108,10 +95,12 @@ def writeAnnotation(annFile, imgFile, imgShape, boxes, labels):
 
 def extract_dataset(imagesDirs):
     imagesExtensions = ['jpg', 'jpeg', 'png']
-    digitsFolder = 'digits'
+    digitsFolderName = 'digits'
 
-    for d in imagesDirs:
-        os.makedirs(os.path.join(d, digitsFolder), exist_ok=True)
+    digitsDirs = [os.path.join(d, digitsFolderName) for d in imagesDirs]
+
+    for d in digitsDirs:
+        os.makedirs(d, exist_ok=True)
 
     results = []
     for img_file in list_files(imagesDirs, imagesExtensions):
@@ -124,16 +113,17 @@ def extract_dataset(imagesDirs):
     for img_file, screenImg, digitBoxes, digitLabels in results:
         parentDir, imgBaseName = os.path.split(img_file)
         nameWithoutExt = os.path.splitext(imgBaseName)[0]
-        screenImgFile = os.path.join(parentDir, digitsFolder, imgBaseName)
-        annFile = os.path.join(parentDir, digitsFolder, nameWithoutExt + '.xml')
+        screenImgFile = os.path.join(parentDir, digitsFolderName, imgBaseName)
+        annFile = os.path.join(parentDir, digitsFolderName, nameWithoutExt + '.xml')
 
         cv2.imwrite(screenImgFile, screenImg, [cv2.IMWRITE_JPEG_QUALITY, 100])
         writeAnnotation(annFile, screenImgFile, screenImg.shape, digitBoxes, digitLabels)
+    import voc_to_yolo
+    labels = [str(i) for i in range(10)]
+    voc_to_yolo.convert(labels, digitsDirs)
 
 
-def main():
-    # extract rect with screen, adjust digits coords
-    # save screen img and adjusted annotations to ./digits
+def __main():
     imagesDirs = [
         "/hdd/Datasets/counters/1_from_phone/train",
         "/hdd/Datasets/counters/2_from_phone/train",
@@ -143,10 +133,12 @@ def main():
         "/hdd/Datasets/counters/5_from_phone",
         "/hdd/Datasets/counters/6_from_phone",
         "/hdd/Datasets/counters/7_from_app",
-        "/hdd/Datasets/counters/8_from_phone"
+        "/hdd/Datasets/counters/8_from_phone",
+        "/hdd/Datasets/counters/Musson_counters/train",
+        "/hdd/Datasets/counters/Musson_counters/val"
     ]
     extract_dataset(imagesDirs)
 
 
 if __name__ == '__main__':
-    main()
+    __main()

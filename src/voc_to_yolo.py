@@ -8,12 +8,7 @@ from trvo_utils.imutils import imSize
 from utils.utils import load_classes
 
 
-def convert():
-    labels = load_classes("counter_digits/data/digits.names")
-    vocDirs = [
-        "/hdd/Datasets/counters/Musson_counters/train/digits",
-        "/hdd/Datasets/counters/Musson_counters/val/digits/"
-    ]
+def convert(labels, vocDirs):
     yoloFileAnnotations = []
 
     for vocDir in vocDirs:
@@ -43,4 +38,13 @@ def convert():
 
 
 if __name__ == '__main__':
-    convert()
+    def _main_convert():
+        labels = [str(i) for i in range(10)]
+        vocDirs = [
+            "/hdd/Datasets/counters/Musson_counters/train/digits/",
+            "/hdd/Datasets/counters/Musson_counters/val/digits/"
+        ]
+        convert(labels, vocDirs)
+
+
+    _main_convert()

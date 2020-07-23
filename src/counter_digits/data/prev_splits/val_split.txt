@@ -1,0 +1,5 @@
+/hdd/Datasets/counters/Musson_counters/val/digits/000010.jpg
+/hdd/Datasets/counters/Musson_counters/val/digits/000014.jpg
+/hdd/Datasets/counters/Musson_counters/val/digits/000029.jpg
+/hdd/Datasets/counters/Musson_counters/val/digits/000021.jpg
+/hdd/Datasets/counters/Musson_counters/val/digits/000001.jpg
