@@ -8,6 +8,7 @@ from trvo_utils.imutils import imshowWait
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree
+import voc_to_yolo
 
 
 def list_files(dirs, extensions):
@@ -118,7 +119,7 @@ def extract_dataset(imagesDirs):
 
         cv2.imwrite(screenImgFile, screenImg, [cv2.IMWRITE_JPEG_QUALITY, 100])
         writeAnnotation(annFile, screenImgFile, screenImg.shape, digitBoxes, digitLabels)
-    import voc_to_yolo
+
     labels = [str(i) for i in range(10)]
     voc_to_yolo.convert(labels, digitsDirs)
 
