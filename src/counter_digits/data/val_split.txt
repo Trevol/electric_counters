@@ -1,4 +1,5 @@
 /hdd/Datasets/counters/4_from_phone/digits/P_20200517_155839.jpg
+/hdd/Datasets/counters/5_from_phone/digits/P_20200518_165135.jpg
 /hdd/Datasets/counters/Musson_counters/train/digits/000034.jpg
 /hdd/Datasets/counters/Musson_counters/train/digits/000035.jpg
 /hdd/Datasets/counters/Musson_counters/train/digits/000036.jpg

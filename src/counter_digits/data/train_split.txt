@@ -1,7 +1,7 @@
 /hdd/Datasets/counters/1_from_phone/train/digits/000000.jpg
 /hdd/Datasets/counters/1_from_phone/train/digits/000028.jpg
-/hdd/Datasets/counters/1_from_phone/train/digits/000080.jpg
-/hdd/Datasets/counters/1_from_phone/train/digits/000089.jpg
+/hdd/Datasets/counters/1_from_phone/train/digits/001233.jpg
+/hdd/Datasets/counters/1_from_phone/train/digits/001394.jpg
 /hdd/Datasets/counters/2_from_phone/train/digits/000000.jpg
 /hdd/Datasets/counters/2_from_phone/train/digits/000004.jpg
 /hdd/Datasets/counters/2_from_phone/train/digits/000010.jpg
@@ -14,6 +14,9 @@
 /hdd/Datasets/counters/4_from_phone/digits/P_20200517_155508.jpg
 /hdd/Datasets/counters/5_from_phone/digits/P_20200518_102139.jpg
 /hdd/Datasets/counters/5_from_phone/digits/P_20200518_103354.jpg
+/hdd/Datasets/counters/5_from_phone/digits/P_20200518_105347.jpg
+/hdd/Datasets/counters/5_from_phone/digits/P_20200518_163854.jpg
+/hdd/Datasets/counters/5_from_phone/digits/P_20200518_164632.jpg
 /hdd/Datasets/counters/Musson_counters/train/digits/000000.jpg
 /hdd/Datasets/counters/Musson_counters/train/digits/000002.jpg
 /hdd/Datasets/counters/Musson_counters/train/digits/000008.jpg
