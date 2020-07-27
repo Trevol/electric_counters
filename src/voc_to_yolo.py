@@ -19,7 +19,7 @@ def convert(labels, vocDirs):
             yoloFile = fileName + '.txt'
 
             imHeight, imWidth = imSize(cv2.imread(fileName + imgExt))
-            assert p.size() == (imWidth, imHeight)
+            assert p.size() in [(imWidth, imHeight), (imHeight, imWidth)]
 
             yoloAnnotations = []
             for (x1, y1, x2, y2), label in zip(p.boxes(), p.labels()):
@@ -39,10 +39,16 @@ def convert(labels, vocDirs):
 
 if __name__ == '__main__':
     def _main_convert():
-        labels = [str(i) for i in range(10)]
+        labels = ["counter", "counter_screen"]
         vocDirs = [
-            "/hdd/Datasets/counters/Musson_counters/train/digits/",
-            "/hdd/Datasets/counters/Musson_counters/val/digits/"
+            "/hdd/Datasets/counters/0_from_internet/train"
+            "/hdd/Datasets/counters/0_from_internet/val",
+            "/hdd/Datasets/counters/1_from_phone/train",
+            "/hdd/Datasets/counters/1_from_phone/val",
+            "/hdd/Datasets/counters/2_from_phone/train",
+            "/hdd/Datasets/counters/2_from_phone/val",
+            "/hdd/Datasets/counters/Musson_counters/train",
+            "/hdd/Datasets/counters/Musson_counters/val",
         ]
         convert(labels, vocDirs)
 

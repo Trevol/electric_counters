@@ -4,11 +4,11 @@ from glob import glob
 import cv2
 from trvo_utils import toInt_array
 from trvo_utils.annotation import PascalVocXmlParser
-from trvo_utils.imutils import imshowWait
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree
 import voc_to_yolo
+from counter_digits.dataset_utils.consts import IMAGES_EXTENSIONS
 
 
 def list_files(dirs, extensions):
@@ -20,8 +20,7 @@ def list_files(dirs, extensions):
             yield f
 
 
-def digitsAnnotationFile(imgFile):
-    annotations_dir = 'digits_annotations'
+def digitsAnnotationFile(imgFile, annotations_dir):
     parent, file_ = os.path.split(imgFile)
     nameWithoutExt = os.path.splitext(file_)[0]
     ann_file = os.path.join(parent, annotations_dir, nameWithoutExt + '.xml')
@@ -94,8 +93,7 @@ def writeAnnotation(annFile, imgFile, imgShape, boxes, labels):
     tree.write(annFile)
 
 
-def extract_dataset(imagesDirs):
-    imagesExtensions = ['jpg', 'jpeg', 'png']
+def extract_dataset(imagesDirs, annotations_dir):
     digitsFolderName = 'digits'
 
     digitsDirs = [os.path.join(d, digitsFolderName) for d in imagesDirs]
@@ -104,8 +102,8 @@ def extract_dataset(imagesDirs):
         os.makedirs(d, exist_ok=True)
 
     results = []
-    for img_file in list_files(imagesDirs, imagesExtensions):
-        ann_file = digitsAnnotationFile(img_file)
+    for img_file in list_files(imagesDirs, IMAGES_EXTENSIONS):
+        ann_file = digitsAnnotationFile(img_file, annotations_dir)
         if ann_file is None:
             continue
         screenImg, digitBoxes, digitLabels = extract_screenImg_digitsAnnotations(img_file, ann_file)
@@ -140,7 +138,8 @@ def __main():
         "/hdd/Datasets/counters/Musson_counters/train",
         "/hdd/Datasets/counters/Musson_counters/val"
     ]
-    extract_dataset(imagesDirs)
+    annotations_dir = 'digits_annotations'
+    extract_dataset(imagesDirs, annotations_dir)
 
 
 if __name__ == '__main__':

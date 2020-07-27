@@ -4,11 +4,11 @@ from pathlib import Path
 from PIL import ImageMath
 from trvo_utils.annotation import PascalVocXmlParser
 
+from counter_digits.dataset_utils.consts import IMAGES_EXTENSIONS
 from counter_digits.dataset_utils.extract_dataset import list_files
 
 
 class DigitsDataset:
-    imagesExtensions = ['jpg', 'jpeg', 'png']
 
     def __init__(self, datasetRootDir):
         self._dirs = self._digitDirs(datasetRootDir)
@@ -38,7 +38,7 @@ class DigitsDataset:
     def _annotatedImagesPerDirectory(self):
         result = dict()
         for d in self._dirs:
-            result[d] = list(list_files([d], self.imagesExtensions))
+            result[d] = list(list_files([d], IMAGES_EXTENSIONS))
         return result
 
     @staticmethod
@@ -96,32 +96,6 @@ def main_tran_val_split():
     saveTo = 'train_split.txt', 'val_split.txt'
     trainImages, valImages = ds.train_val_split(splitRatio=.8, saveTo=saveTo)
     print(len(trainImages), len(valImages))
-
-
-def main_split_test():
-    s1, s2 = DigitsDataset._split_items(.5, [1, 2, 3])
-    assert s1 == [1, 2] and s2 == [3]
-
-    s1, s2 = DigitsDataset._split_items(.5, [1, 2])
-    assert s1 == [1] and s2 == [2]
-
-    s1, s2 = DigitsDataset._split_items(.9, [1, 2, 3])
-    assert s1 == [1, 2, 3] and s2 == []
-
-    s1, s2 = DigitsDataset._split_items(1, [1, 2, 3])
-    assert s1 == [1, 2, 3] and s2 == []
-
-    s1, s2 = DigitsDataset._split_items(.1, [1, 2, 3])
-    assert s1 == [1] and s2 == [2, 3]
-
-    s1, s2 = DigitsDataset._split_items(0, [1, 2, 3])
-    assert s1 == [] and s2 == [1, 2, 3]
-
-    s1, s2 = DigitsDataset._split_items(0, [])
-    assert s1 == [] and s2 == []
-
-    s1, s2 = DigitsDataset._split_items(.9, [])
-    assert s1 == [] and s2 == []
 
 
 if __name__ == '__main__':

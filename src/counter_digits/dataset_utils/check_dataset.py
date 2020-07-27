@@ -20,7 +20,7 @@ def display(imgFile, annotationFile):
         else:
             x1, y1, x2, y2 = toInt(x1, y1, x2, y2)
 
-        cv2.rectangle(img, (x1, y1), (x2, y2), color, 1)
+        cv2.rectangle(img, (x1, y1), (x2, y2), color, thickness=2)
     return imshowWait([img, imgFile])
 
 
@@ -59,8 +59,26 @@ if __name__ == '__main__':
         dirConfigs = [
             # ("/hdd/Datasets/counters/0_from_internet/train", inplaceAnnotation),
             # ("/hdd/Datasets/counters/0_from_internet/val", inplaceAnnotation),
-            ("/hdd/Datasets/counters/1_from_phone/train", inplaceAnnotation),
-            ("/hdd/Datasets/counters/1_from_phone/val", inplaceAnnotation)
+
+            # ("/hdd/Datasets/counters/1_from_phone/train", inplaceAnnotation),
+            # ("/hdd/Datasets/counters/1_from_phone/val", inplaceAnnotation),
+            # ("/hdd/Datasets/counters/1_from_phone/train", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/1_from_phone/val", annotation_at_digits_annotations),
+
+            # ("/hdd/Datasets/counters/2_from_phone/train", inplaceAnnotation),
+            # ("/hdd/Datasets/counters/2_from_phone/val", inplaceAnnotation),
+            # ("/hdd/Datasets/counters/2_from_phone/train", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/2_from_phone/val", annotation_at_digits_annotations),
+
+            ("/hdd/Datasets/counters/3_from_phone", annotation_at_digits_annotations),
+            ("/hdd/Datasets/counters/4_from_phone", annotation_at_digits_annotations),
+            ("/hdd/Datasets/counters/5_from_phone", annotation_at_digits_annotations),
+            ("/hdd/Datasets/counters/6_from_phone", annotation_at_digits_annotations),
+            ("/hdd/Datasets/counters/7_from_app", annotation_at_digits_annotations),
+            ("/hdd/Datasets/counters/8_from_phone", annotation_at_digits_annotations),
+            ("/hdd/Datasets/counters/Musson_counters/train", annotation_at_digits_annotations),
+            ("/hdd/Datasets/counters/Musson_counters/val", annotation_at_digits_annotations),
+
         ]
         check(dirConfigs)
 
