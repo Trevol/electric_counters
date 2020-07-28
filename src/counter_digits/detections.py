@@ -29,13 +29,14 @@ def test_detect():
     image_files = [
         # '/hdd/Datasets/counters/Musson_counters/train/digits/*.jpg',
         # '/hdd/Datasets/counters/Musson_counters/val/digits/*.jpg',
-        '/hdd/Datasets/counters/1_from_phone/train/digits/*.jpg'
+        # '/hdd/Datasets/counters/1_from_phone/train/digits/*.jpg',
+        '/hdd/Datasets/counters/5_from_phone/digits/*.jpg'
     ]
 
     s = 320
     detector = DarknetDetector(
         cfg_path=f'data/yolov3-tiny-10cls-{s}.cfg',
-        weights_path=f'best_weights/best_{s}.weights',
+        weights_path=f'best_weights/1/best_{s}.weights',
         input_size=(s, s),
         device='cpu',
         conf_thres=.3,
@@ -58,6 +59,6 @@ def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
     cfg_file = 'data/yolov3-tiny-10cls-320.cfg'
-    weights_file = 'best_weights/best_320.pt'
+    weights_file = 'best_weights/1/best_320.pt'
 
     convert(cfg_file, weights_file)
