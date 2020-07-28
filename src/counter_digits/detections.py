@@ -36,7 +36,7 @@ def test_detect():
     s = 320
     detector = DarknetDetector(
         cfg_path=f'data/yolov3-tiny-10cls-{s}.cfg',
-        weights_path=f'best_weights/1/best_{s}.weights',
+        weights_path=f'best_weights/2/best_{s}.weights',
         input_size=(s, s),
         device='cpu',
         conf_thres=.3,
@@ -59,6 +59,6 @@ def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
     cfg_file = 'data/yolov3-tiny-10cls-320.cfg'
-    weights_file = 'best_weights/1/best_320.pt'
+    weights_file = 'best_weights/2/best_320.pt'
 
     convert(cfg_file, weights_file)
