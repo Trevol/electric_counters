@@ -70,15 +70,16 @@ if __name__ == '__main__':
             # ("/hdd/Datasets/counters/2_from_phone/train", annotation_at_digits_annotations),
             # ("/hdd/Datasets/counters/2_from_phone/val", annotation_at_digits_annotations),
 
-            ("/hdd/Datasets/counters/3_from_phone", annotation_at_digits_annotations),
-            ("/hdd/Datasets/counters/4_from_phone", annotation_at_digits_annotations),
-            ("/hdd/Datasets/counters/5_from_phone", annotation_at_digits_annotations),
-            ("/hdd/Datasets/counters/6_from_phone", annotation_at_digits_annotations),
-            ("/hdd/Datasets/counters/7_from_app", annotation_at_digits_annotations),
-            ("/hdd/Datasets/counters/8_from_phone", annotation_at_digits_annotations),
-            ("/hdd/Datasets/counters/Musson_counters/train", annotation_at_digits_annotations),
-            ("/hdd/Datasets/counters/Musson_counters/val", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/3_from_phone", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/4_from_phone", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/5_from_phone", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/6_from_phone", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/7_from_app", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/8_from_phone", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/Musson_counters/train", annotation_at_digits_annotations),
+            # ("/hdd/Datasets/counters/Musson_counters/val", annotation_at_digits_annotations),
 
+            ("/hdd/Datasets/counters/8_from_phone/digits", inplaceAnnotation),
         ]
         check(dirConfigs)
 

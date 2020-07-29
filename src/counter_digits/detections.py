@@ -16,7 +16,7 @@ def drawDetections(img, detections):
         cv2.rectangle(img, (x1, y1), (x2, y2), green, 1)
 
         cv2.rectangle(imgWithLabels, (x1, y1), (x2, y2), green, 1)
-        cv2.putText(imgWithLabels, str(int(cls)), (x1+2, y2-3), cv2.FONT_HERSHEY_SIMPLEX, .8, green)
+        cv2.putText(imgWithLabels, str(int(cls)), (x1 + 2, y2 - 3), cv2.FONT_HERSHEY_SIMPLEX, .8, green)
         print(int(cls), " ")
     print("")
     result = np.vstack([img, imgWithLabels])
@@ -30,13 +30,15 @@ def test_detect():
         # '/hdd/Datasets/counters/Musson_counters/train/digits/*.jpg',
         # '/hdd/Datasets/counters/Musson_counters/val/digits/*.jpg',
         # '/hdd/Datasets/counters/1_from_phone/train/digits/*.jpg',
-        '/hdd/Datasets/counters/5_from_phone/digits/*.jpg'
+        # '/hdd/Datasets/counters/5_from_phone/digits/*.jpg',
+        # '/hdd/Datasets/counters/6_from_phone/digits/*.jpg',
+        '/hdd/Datasets/counters/8_from_phone/digits/*.jpg',
     ]
 
     s = 320
     detector = DarknetDetector(
         cfg_path=f'data/yolov3-tiny-10cls-{s}.cfg',
-        weights_path=f'best_weights/2/best_{s}.weights',
+        weights_path=f'best_weights/3/best_{s}.weights',
         input_size=(s, s),
         device='cpu',
         conf_thres=.3,
@@ -46,6 +48,7 @@ def test_detect():
     for im_files in image_files:
         for image_file in sorted(glob(im_files)):
             img = imreadRGB(image_file)
+            # img = img[700:850, 760:1250]
             pred = detector.detect(img)
 
             withDetections = drawDetections(img, pred[0])
@@ -59,6 +62,6 @@ def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
     cfg_file = 'data/yolov3-tiny-10cls-320.cfg'
-    weights_file = 'best_weights/2/best_320.pt'
+    weights_file = 'best_weights/3/best_320.pt'
 
     convert(cfg_file, weights_file)
