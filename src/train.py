@@ -8,7 +8,7 @@ from torch.utils.tensorboard import SummaryWriter
 import test  # import test.py to get mAP after each epoch
 from models import *
 from utils.datasets import *
-from utils2.path_utils import ensureRelativeToDir
+from trvo_utils.path_utils import ensureRelativeToDir
 from utils.utils import *
 
 mixed_precision = True

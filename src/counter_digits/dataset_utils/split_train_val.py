@@ -5,7 +5,7 @@ from PIL import ImageMath
 from trvo_utils.annotation import PascalVocXmlParser
 
 from counter_digits.dataset_utils.consts import IMAGES_EXTENSIONS
-from counter_digits.dataset_utils.extract_dataset import list_files
+from trvo_utils.path_utils import list_files
 
 
 class DigitsDataset:

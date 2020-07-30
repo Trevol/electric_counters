@@ -42,8 +42,7 @@ class DarknetDetector:
     def detect(self, rgbImage):
         input = self.preprocess(rgbImage, self.input_size).to(self.device)
         with torch.no_grad():
-            with timeit():
-                pred = self.model(input)[0]
+            pred = self.model(input)[0]
 
         pred = self.nms(pred, self.conf_thres, self.iou_thres)
 

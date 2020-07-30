@@ -4,22 +4,17 @@ import os
 
 from trvo_utils import toInt_array, toInt
 from trvo_utils.annotation import PascalVocXmlParser
-from trvo_utils.imutils import imshowWait, imSize, fit_image_to_shape
+from trvo_utils.imutils import imshowWait, imSize, fit_image_to_shape, fit_image_boxes_to_shape
 
-from counter_digits.dataset_utils.extract_dataset import list_files
+from trvo_utils.path_utils import list_files
 
 
 def display(imgFile, annotationFile):
     img = cv2.imread(imgFile)
     p = PascalVocXmlParser(annotationFile)
     color = 255, 0, 0
-    img, scale = fit_image_to_shape(img, (950, 1850))
-    for x1, y1, x2, y2 in p.boxes():
-        if scale < 1:
-            x1, y1, x2, y2 = toInt(x1 * scale, y1 * scale, x2 * scale, y2 * scale)
-        else:
-            x1, y1, x2, y2 = toInt(x1, y1, x2, y2)
-
+    img, boxes, scale = fit_image_boxes_to_shape(img, p.boxes(), (950, 1850))
+    for x1, y1, x2, y2 in boxes:
         cv2.rectangle(img, (x1, y1), (x2, y2), color, thickness=2)
     return imshowWait([img, imgFile])
 
@@ -60,8 +55,8 @@ if __name__ == '__main__':
             # ("/hdd/Datasets/counters/0_from_internet/train", inplaceAnnotation),
             # ("/hdd/Datasets/counters/0_from_internet/val", inplaceAnnotation),
 
-            # ("/hdd/Datasets/counters/1_from_phone/train", inplaceAnnotation),
-            # ("/hdd/Datasets/counters/1_from_phone/val", inplaceAnnotation),
+            ("/hdd/Datasets/counters/1_from_phone/train", inplaceAnnotation),
+            ("/hdd/Datasets/counters/1_from_phone/val", inplaceAnnotation),
             # ("/hdd/Datasets/counters/1_from_phone/train", annotation_at_digits_annotations),
             # ("/hdd/Datasets/counters/1_from_phone/val", annotation_at_digits_annotations),
 

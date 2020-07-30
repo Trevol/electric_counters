@@ -1,5 +1,4 @@
 import os
-from glob import glob
 
 import cv2
 from trvo_utils import toInt_array
@@ -9,15 +8,7 @@ import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree
 import voc_to_yolo
 from counter_digits.dataset_utils.consts import IMAGES_EXTENSIONS
-
-
-def list_files(dirs, extensions):
-    for d in dirs:
-        files = []
-        for e in extensions:
-            files.extend(glob(os.path.join(d, '*.' + e)))
-        for f in sorted(set(files)):
-            yield f
+from trvo_utils.path_utils import list_files
 
 
 def digitsAnnotationFile(imgFile, annotations_dir):

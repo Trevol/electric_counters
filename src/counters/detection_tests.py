@@ -2,9 +2,11 @@ from glob import glob
 
 import cv2
 from trvo_utils import toInt_array
-from trvo_utils.imutils import imreadRGB, imshowWait, rgb2bgr
+from trvo_utils.imutils import imreadRGB, imshowWait, rgb2bgr, bgr2rgb, fit_image_to_shape
 
 from DarknetDetector import DarknetDetector
+from consts import BGRColors, FHD_SHAPE
+from utils_local.vis_utils import drawDetections, fitImageDetectionsToShape
 
 
 def test_detect():
@@ -32,15 +34,13 @@ def test_detect():
 
     for im_files in image_files:
         for image_file in sorted(glob(im_files)):
-            img = imreadRGB(image_file)
-            pred = detector.detect(img)
+            img = cv2.imread(image_file)
+            detections = detector.detect(bgr2rgb(img))[0]
 
-            for *xyxy, conf, cls in pred[0]:
-                x1, y1, x2, y2 = toInt_array(xyxy)
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 200, 0), 3)
+            img, detections, _ = fitImageDetectionsToShape(img, detections, FHD_SHAPE)
+            drawDetections(img, detections, BGRColors.green)
 
-            displayImg = rgb2bgr(cv2.resize(img, None, None, .4, .4))
-            k = imshowWait([displayImg, image_file])
+            k = imshowWait([img, image_file])
             if k == 27:
                 return
 

@@ -6,20 +6,19 @@ from trvo_utils import toInt_array
 from trvo_utils.imutils import imreadRGB, imshowWait, rgb2bgr
 
 from DarknetDetector import DarknetDetector
+from consts import BGRColors
+from utils_local.vis_utils import drawDetections
 
 
-def drawDetections(img, detections):
-    green = (0, 200, 0)
-    imgWithLabels = np.zeros_like(img)
-    for *xyxy, conf, cls in detections:
-        x1, y1, x2, y2 = toInt_array(xyxy)
-        cv2.rectangle(img, (x1, y1), (x2, y2), green, 1)
+def drawDetections_MultiStage(img, detections, color=BGRColors.green):
+    imgWithClasses = np.zeros_like(img)
+    imgWithScores = np.zeros_like(img)
 
-        cv2.rectangle(imgWithLabels, (x1, y1), (x2, y2), green, 1)
-        cv2.putText(imgWithLabels, str(int(cls)), (x1 + 2, y2 - 3), cv2.FONT_HERSHEY_SIMPLEX, .8, green)
-        print(int(cls), " ")
-    print("")
-    result = np.vstack([img, imgWithLabels])
+    drawDetections(img, detections, color)
+    drawDetections(imgWithClasses, detections, color, withClasses=True)
+    drawDetections(imgWithScores, detections, color, withScores=True)
+
+    result = np.vstack([img, imgWithClasses, imgWithScores])
     return result
 
 
@@ -51,7 +50,7 @@ def test_detect():
             # img = img[700:850, 760:1250]
             pred = detector.detect(img)
 
-            withDetections = drawDetections(img, pred[0])
+            withDetections = drawDetections_MultiStage(img, pred[0])
 
             k = imshowWait([rgb2bgr(withDetections), image_file])
             if k == 27:
