@@ -37,32 +37,9 @@ def extractObjectImage(desiredClass, img, detections, noImage=None, extraSpace=0
 
 
 def main():
-    noScreenImage = zeros((50, 150))
-    screenClass = 1
-    dirs = [
-        # "/hdd/Datasets/counters/8_from_phone",
-        # "/hdd/Datasets/counters/Musson_counters_2",
-        # "/hdd/Datasets/ElectroCounters/ElectroCounters_4/ElectroCounters/2020-08-01-19-26-39-482"
-        "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets"
-    ]
-    screenDetector, digitsDetector = createDetectors()
-    for img_file in enumerate_images(dirs):
-        img = cv2.imread(img_file)
-        detections = screenDetector.detect(bgr2rgb(img))[0]
-        screenImg = extractObjectImage(screenClass, img, detections, extraSpace=5)
-
-        if screenImg is None:
-            screenImg = noScreenImage
-        else:
-            digitDetections = digitsDetector.detect(bgr2rgb(screenImg))[0]
-            screenImg = drawDigitsDetections(screenImg, digitDetections, BGRColors.green)
-
-        img, detections, _ = fitImageDetectionsToShape(img, detections, FHD_SHAPE)
-        drawDetections(img, detections, BGRColors.green, withScores=True)
-
-        if imshowWait(img, screenImg) == 27:
-            break
-
+    bgrImage = cv2.imread("/home/trevol/IdeaProjects/HelloKotlin/screenBgrImage.png")
+    _, digitsDetector = createDetectors()
+    digitsDetector.detect()
 
 if __name__ == '__main__':
     main()

@@ -6,9 +6,14 @@ from trvo_utils.annotation import PascalVocXmlParser
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree
+
+from trvo_utils.imutils import imgByBox
+
 import voc_to_yolo
-from counter_digits.dataset_utils.consts import IMAGES_EXTENSIONS
+
 from trvo_utils.path_utils import list_files
+
+from consts import IMAGES_EXTENSIONS
 
 
 def digitsAnnotationFile(imgFile, annotations_dir):
@@ -18,11 +23,6 @@ def digitsAnnotationFile(imgFile, annotations_dir):
     if os.path.isfile(ann_file):
         return ann_file
     return None
-
-
-def imgByBox(srcImg, box, extraSpace=0):
-    x1, y1, x2, y2 = toInt_array(box)
-    return srcImg[y1 - extraSpace:y2 + extraSpace, x1 - extraSpace:x2 + extraSpace]
 
 
 def shiftBoxes(boxes, x, y):
