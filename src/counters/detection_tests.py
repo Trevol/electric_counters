@@ -4,7 +4,7 @@ import cv2
 from trvo_utils import toInt_array
 from trvo_utils.imutils import imreadRGB, imshowWait, rgb2bgr, bgr2rgb, fit_image_to_shape
 
-from DarknetDetector import DarknetDetector
+from DarknetPytorchDetector import DarknetPytorchDetector
 from consts import BGRColors, FHD_SHAPE
 from utils_local.vis_utils import drawDetections, fitImageDetectionsToShape
 
@@ -23,7 +23,7 @@ def test_detect():
     ]
 
     s = 320
-    detector = DarknetDetector(
+    detector = DarknetPytorchDetector(
         cfg_path=f'data/yolov3-tiny-2cls-{s}.cfg',
         weights_path=f'best_weights/yolov3-tiny-2cls/{s}/yolov3-tiny-2cls-{s}.weights',
         input_size=(s, s),

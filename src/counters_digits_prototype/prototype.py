@@ -1,26 +1,28 @@
 import cv2
 import numpy as np
-from trvo_utils.imutils import imshowWait, bgr2rgb, zeros
+from trvo_utils.imutils import imshowWait, bgr2rgb, zeros, fit_image_to_shape
 from trvo_utils.path_utils import list_files
 
-from DarknetDetector import DarknetDetector
+from DarknetOpencvDetector import DarknetOpencvDetector
+from DarknetPytorchDetector import DarknetPytorchDetector
 from consts import IMAGES_EXTENSIONS, FHD_SHAPE, BGRColors
 from counter_digits.dataset_utils.extract_dataset import imgByBox
+from utils.datasets import letterbox
 from utils_local.vis_utils import fitImageDetectionsToShape, drawDetections, drawDigitsDetections
 
 
 def createDetectors():
     cfg_file = '../counters/data/yolov3-tiny-2cls-320.cfg'
     weights_file = '../counters/best_weights/yolov3-tiny-2cls/320/yolov3-tiny-2cls-320.weights'
-    screenDetector = DarknetDetector(cfg_file, weights_file, 320)
-    yield screenDetector
+    yield DarknetPytorchDetector(cfg_file, weights_file, 320)
+    yield DarknetOpencvDetector(cfg_file, weights_file, 320)
 
-    cfg_file = '../counter_digits/data/yolov3-tiny-10cls-320.cfg'
+    # cfg_file = '../counter_digits/data/yolov3-tiny-10cls-320.cfg'
     cfg_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.cfg"
-    weights_file = '../counter_digits/best_weights/3/yolov3-tiny-10cls-320.weights'
+    # weights_file = '../counter_digits/best_weights/3/yolov3-tiny-10cls-320.weights'
     weights_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.weights"
-    digitsDetector = DarknetDetector(cfg_file, weights_file, 320)
-    yield digitsDetector
+    yield DarknetPytorchDetector(cfg_file, weights_file, 320)
+    yield DarknetOpencvDetector(cfg_file, weights_file, 320)
 
 
 def enumerate_images(dirs):
@@ -40,27 +42,28 @@ def main():
     noScreenImage = zeros((50, 150))
     screenClass = 1
     dirs = [
-        # "/hdd/Datasets/counters/8_from_phone",
+        "/hdd/Datasets/counters/8_from_phone",
         # "/hdd/Datasets/counters/Musson_counters_2",
         # "/hdd/Datasets/ElectroCounters/ElectroCounters_4/ElectroCounters/2020-08-01-19-26-39-482"
-        "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets"
+        # "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets"
     ]
-    screenDetector, digitsDetector = createDetectors()
+    pytorchScreenDetector, opencvScreenDetector, pytorchDigitsDetector, opencvDigitsDetector = createDetectors()
     for img_file in enumerate_images(dirs):
-        img = cv2.imread(img_file)
-        detections = screenDetector.detect(bgr2rgb(img))[0]
-        screenImg = extractObjectImage(screenClass, img, detections, extraSpace=5)
+        imgBgr = cv2.imread(img_file)
+
+        detections = pytorchScreenDetector.detect(bgr2rgb(imgBgr))[0]
+        screenImg = extractObjectImage(screenClass, imgBgr, detections, extraSpace=5)
 
         if screenImg is None:
             screenImg = noScreenImage
         else:
-            digitDetections = digitsDetector.detect(bgr2rgb(screenImg))[0]
+            digitDetections = pytorchDigitsDetector.detect(bgr2rgb(screenImg))[0]
             screenImg = drawDigitsDetections(screenImg, digitDetections, BGRColors.green)
 
-        img, detections, _ = fitImageDetectionsToShape(img, detections, FHD_SHAPE)
-        drawDetections(img, detections, BGRColors.green, withScores=True)
+        imgBgr, detections, _ = fitImageDetectionsToShape(imgBgr, detections, FHD_SHAPE)
+        drawDetections(imgBgr, detections, BGRColors.green, withScores=True)
 
-        if imshowWait(img, screenImg) == 27:
+        if imshowWait(imgBgr, screenImg) == 27:
             break
 
 

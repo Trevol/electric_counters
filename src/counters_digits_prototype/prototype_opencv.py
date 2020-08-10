@@ -3,7 +3,7 @@ import numpy as np
 from trvo_utils.imutils import imshowWait, bgr2rgb, zeros
 from trvo_utils.path_utils import list_files
 
-from DarknetDetector import DarknetDetector
+from DarknetPytorchDetector import DarknetPytorchDetector
 from consts import IMAGES_EXTENSIONS, FHD_SHAPE, BGRColors
 from counter_digits.dataset_utils.extract_dataset import imgByBox
 from utils_local.vis_utils import fitImageDetectionsToShape, drawDetections, drawDigitsDetections
@@ -12,14 +12,14 @@ from utils_local.vis_utils import fitImageDetectionsToShape, drawDetections, dra
 def createDetectors():
     cfg_file = '../counters/data/yolov3-tiny-2cls-320.cfg'
     weights_file = '../counters/best_weights/yolov3-tiny-2cls/320/yolov3-tiny-2cls-320.weights'
-    screenDetector = DarknetDetector(cfg_file, weights_file, 320)
+    screenDetector = DarknetPytorchDetector(cfg_file, weights_file, 320)
     yield screenDetector
 
     cfg_file = '../counter_digits/data/yolov3-tiny-10cls-320.cfg'
     cfg_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.cfg"
     weights_file = '../counter_digits/best_weights/3/yolov3-tiny-10cls-320.weights'
     weights_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.weights"
-    digitsDetector = DarknetDetector(cfg_file, weights_file, 320)
+    digitsDetector = DarknetPytorchDetector(cfg_file, weights_file, 320)
     yield digitsDetector
 
 

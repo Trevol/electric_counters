@@ -2,7 +2,7 @@ from glob import glob
 
 from trvo_utils.imutils import imreadRGB, imshowWait, rgb2bgr
 
-from DarknetDetector import DarknetDetector
+from DarknetPytorchDetector import DarknetPytorchDetector
 from utils_local.vis_utils import drawDigitsDetections
 
 
@@ -20,7 +20,7 @@ def test_detect():
     ]
 
     s = 320
-    detector = DarknetDetector(
+    detector = DarknetPytorchDetector(
         cfg_path=f'data/yolov3-tiny-10cls-{s}.cfg',
         weights_path=f'best_weights/3/yolov3-tiny-10cls-320.weights',
         input_size=(s, s),

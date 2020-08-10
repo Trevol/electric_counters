@@ -7,7 +7,7 @@ from utils.datasets import letterbox
 from utils.utils import non_max_suppression, scale_coords
 
 
-class DarknetDetector:
+class DarknetPytorchDetector:
     def __init__(self, cfg_path, weights_path, input_size, device='cpu', conf_thres=.3, iou_thres=.4):
         self.input_size = input_size
         self.device = device
