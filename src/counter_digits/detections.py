@@ -10,12 +10,12 @@ def test_detect():
     print("")
 
     image_files = [
-        # '/hdd/Datasets/counters/Musson_counters/train/digits/*.jpg',
-        # '/hdd/Datasets/counters/Musson_counters/val/digits/*.jpg',
-        # '/hdd/Datasets/counters/1_from_phone/train/digits/*.jpg',
-        # '/hdd/Datasets/counters/5_from_phone/digits/*.jpg',
-        # '/hdd/Datasets/counters/6_from_phone/digits/*.jpg',
-        '/hdd/Datasets/counters/8_from_phone/digits/*.jpg',
+        # '/hdd/Datasets/counters/data/Musson_counters/train/digits/*.jpg',
+        # '/hdd/Datasets/counters/data/Musson_counters/val/digits/*.jpg',
+        # '/hdd/Datasets/counters/data/1_from_phone/train/digits/*.jpg',
+        # '/hdd/Datasets/counters/data/5_from_phone/digits/*.jpg',
+        # '/hdd/Datasets/counters/data/6_from_phone/digits/*.jpg',
+        '/hdd/Datasets/counters/data/8_from_phone/digits/*.jpg',
         # "/home/trevol/IdeaProjects/HelloKotlin/screenBgrImage.png"
     ]
 

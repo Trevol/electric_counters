@@ -3,8 +3,8 @@ from pathlib import Path
 
 from PIL import ImageMath
 from trvo_utils.annotation import PascalVocXmlParser
+from trvo_utils.imutils import IMAGES_EXTENSIONS
 
-from counter_digits.dataset_utils.consts import IMAGES_EXTENSIONS
 from trvo_utils.path_utils import list_files
 
 
@@ -83,14 +83,14 @@ class DigitsDataset:
 
 
 def main_stats():
-    rootDir = "/hdd/Datasets/counters"
+    rootDir = "/hdd/Datasets/counters/data"
     ds = DigitsDataset(rootDir)
     stats = ds.stats()
     print(stats)
 
 
 def main_tran_val_split():
-    rootDir = "/hdd/Datasets/counters"
+    rootDir = "/hdd/Datasets/counters/data"
     ds = DigitsDataset(rootDir)
 
     saveTo = 'train_split.txt', 'val_split.txt'

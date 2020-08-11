@@ -1,13 +1,12 @@
 import cv2
 import numpy as np
-from trvo_utils.imutils import imshowWait, bgr2rgb, zeros, fit_image_to_shape
+from trvo_utils.imutils import imshowWait, bgr2rgb, zeros, imgByBox, IMAGES_EXTENSIONS, enumerate_images
 from trvo_utils.path_utils import list_files
 
 from DarknetOpencvDetector import DarknetOpencvDetector
 from DarknetPytorchDetector import DarknetPytorchDetector
-from consts import IMAGES_EXTENSIONS, FHD_SHAPE, BGRColors
-from counter_digits.dataset_utils.extract_dataset import imgByBox
-from utils.datasets import letterbox
+from consts import FHD_SHAPE, BGRColors
+from counters_dataset_paths import paths
 from utils_local.vis_utils import fitImageDetectionsToShape, drawDetections, drawDigitsDetections
 
 
@@ -25,10 +24,6 @@ def createDetectors():
     yield DarknetOpencvDetector(cfg_file, weights_file, 320)
 
 
-def enumerate_images(dirs):
-    return list_files(dirs, IMAGES_EXTENSIONS)
-
-
 def extractObjectImage(desiredClass, img, detections, noImage=None, extraSpace=0):
     desiredDetection = next(filter(lambda d: d[5] == desiredClass, detections), None)
     if desiredDetection is None:
@@ -38,33 +33,50 @@ def extractObjectImage(desiredClass, img, detections, noImage=None, extraSpace=0
     return objectImg
 
 
+def doDetection(pytorchScreenDetector, pytorchDigitsDetector, imgRgb, imgBgr):
+    detections = pytorchScreenDetector.detect(imgRgb)[0]
+    screenImg = extractObjectImage(screenClass, imgBgr, detections, extraSpace=5)
+
+    if screenImg is None:
+        digitsImg = noScreenImage
+    else:
+        digitDetections = pytorchDigitsDetector.detect(bgr2rgb(screenImg))[0]
+        digitsImg = drawDigitsDetections(screenImg, digitDetections, BGRColors.green)
+
+    screenDetectionImg, detections, _ = fitImageDetectionsToShape(imgBgr, detections, FHD_SHAPE)
+    counter_screen_colors = {
+        0: BGRColors.green,
+        1: BGRColors.red
+    }
+    drawDetections(screenDetectionImg, detections, counter_screen_colors, withScores=True)
+    return screenDetectionImg, digitsImg
+
+
+noScreenImage = zeros((50, 150))
+screenClass = 1
+
+
 def main():
-    noScreenImage = zeros((50, 150))
-    screenClass = 1
-    dirs = [
-        "/hdd/Datasets/counters/8_from_phone",
-        # "/hdd/Datasets/counters/Musson_counters_2",
-        # "/hdd/Datasets/ElectroCounters/ElectroCounters_4/ElectroCounters/2020-08-01-19-26-39-482"
-        # "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets"
+    hideFromTitle = "/hdd/Datasets/counters/data"
+    paths = [
+        # "/hdd/Datasets/counters/data/Musson_counters/train",
+        # "/hdd/Datasets/counters/data/Musson_counters/val",
+        "/hdd/Datasets/counters/data/Musson_counters_2",
+        "/hdd/Datasets/counters/data/Musson_counters_3"
     ]
     pytorchScreenDetector, opencvScreenDetector, pytorchDigitsDetector, opencvDigitsDetector = createDetectors()
-    for img_file in enumerate_images(dirs):
+    for img_file in enumerate_images(paths[0:]):
         imgBgr = cv2.imread(img_file)
-
-        detections = pytorchScreenDetector.detect(bgr2rgb(imgBgr))[0]
-        screenImg = extractObjectImage(screenClass, imgBgr, detections, extraSpace=5)
-
-        if screenImg is None:
-            screenImg = noScreenImage
-        else:
-            digitDetections = pytorchDigitsDetector.detect(bgr2rgb(screenImg))[0]
-            screenImg = drawDigitsDetections(screenImg, digitDetections, BGRColors.green)
-
-        imgBgr, detections, _ = fitImageDetectionsToShape(imgBgr, detections, FHD_SHAPE)
-        drawDetections(imgBgr, detections, BGRColors.green, withScores=True)
-
-        if imshowWait(imgBgr, screenImg) == 27:
+        imgRgb = bgr2rgb(imgBgr)
+        pytorchDetectionsImgs = doDetection(pytorchScreenDetector, pytorchDigitsDetector, imgRgb, imgBgr.copy())
+        opencvDetectionsImgs = doDetection(opencvScreenDetector, opencvDigitsDetector, imgRgb, imgBgr)
+        path = img_file.replace(hideFromTitle, "")
+        key = imshowWait([pytorchDetectionsImgs[0], f'trch {path}'], [pytorchDetectionsImgs[1], 'trch'],
+                         [opencvDetectionsImgs[0], f'opcv {path}'], [opencvDetectionsImgs[1], 'opcv'])
+        if key == 27:
             break
+        elif key == ord('a'):
+            print('Need to annotate', img_file)
 
 
 if __name__ == '__main__':

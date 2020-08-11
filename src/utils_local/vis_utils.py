@@ -9,7 +9,6 @@ from consts import BGRColors
 def __makeLabel(klass, score, showClass, showScore):
     assert showClass or showScore
     score = int(score * 100)  # score to int: .868 -> 87 - for space economy
-    klass = int(klass)
     if showClass and showScore:
         return f"{klass} {score}"
     if showClass:
@@ -18,13 +17,19 @@ def __makeLabel(klass, score, showClass, showScore):
 
 
 def drawDetections(img, detections, color, withClasses=False, withScores=False, fontScale=.8):
+    def _color(klass):
+        if isinstance(color, (list, dict)):
+            return color[klass]
+        return color
+
     showLabel = withClasses or withScores
     for *xyxy, score, klass in detections:
+        klass = int(klass)
         x1, y1, x2, y2 = toInt_array(xyxy)
-        cv2.rectangle(img, (x1, y1), (x2, y2), color, 1)
+        cv2.rectangle(img, (x1, y1), (x2, y2), _color(klass), 1)
         if showLabel:
             lbl = __makeLabel(klass, score, withClasses, withScores)
-            cv2.putText(img, lbl, (x1 + 2, y2 - 3), cv2.FONT_HERSHEY_SIMPLEX, fontScale, color)
+            cv2.putText(img, lbl, (x1 + 2, y2 - 3), cv2.FONT_HERSHEY_SIMPLEX, fontScale, _color(klass))
     return img
 
 

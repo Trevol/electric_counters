@@ -13,13 +13,13 @@ def test_detect():
     print("")
 
     image_files = [
-        # '/hdd/Datasets/counters/4_from_phone/*.jpg',
-        # '/home/trevol/hdd/Datasets/counters/7_from_app/*.jpg',
-        # '/home/trevol/hdd/Datasets/counters/0_from_internet/all/*.jp*',
-        # '/hdd/Datasets/counters/for_yolo/images/0_from_internet/train/*.jp*',
-        # '/hdd/Datasets/counters/for_yolo/images/0_from_internet/val/*.jp*',
-        '/hdd/Datasets/counters/Musson_counters/train/*.jpg',
-        '/hdd/Datasets/counters/Musson_counters/val/*.jpg'
+        # '/hdd/Datasets/counters/data/4_from_phone/*.jpg',
+        # '/home/trevol/hdd/Datasets/counters/data/7_from_app/*.jpg',
+        # '/home/trevol/hdd/Datasets/counters/data/0_from_internet/all/*.jp*',
+        # '/hdd/Datasets/counters/data/for_yolo/images/0_from_internet/train/*.jp*',
+        # '/hdd/Datasets/counters/data/for_yolo/images/0_from_internet/val/*.jp*',
+        '/hdd/Datasets/counters/data/Musson_counters/train/*.jpg',
+        '/hdd/Datasets/counters/data/Musson_counters/val/*.jpg'
     ]
 
     s = 320
