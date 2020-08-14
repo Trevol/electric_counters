@@ -18,8 +18,8 @@ def createDetectors():
 
     # cfg_file = '../counter_digits/data/yolov3-tiny-10cls-320.cfg'
     cfg_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.cfg"
-    # weights_file = '../counter_digits/best_weights/3/yolov3-tiny-10cls-320.weights'
-    weights_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.weights"
+    weights_file = '../counter_digits/best_weights/4/yolov3-tiny-10cls-320.weights'
+    # weights_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.weights"
     yield DarknetPytorchDetector(cfg_file, weights_file, 320)
     yield DarknetOpencvDetector(cfg_file, weights_file, 320)
 
@@ -59,9 +59,10 @@ screenClass = 1
 def main():
     hideFromTitle = "/hdd/Datasets/counters/data"
     paths = [
+        "/hdd/Datasets/counters/data/5_from_phone",
         # "/hdd/Datasets/counters/data/Musson_counters",
         # "/hdd/Datasets/counters/data/Musson_counters_2",
-        "/hdd/Datasets/counters/data/Musson_counters_3"
+        # "/hdd/Datasets/counters/data/Musson_counters_3"
     ]
     pytorchScreenDetector, opencvScreenDetector, pytorchDigitsDetector, opencvDigitsDetector = createDetectors()
     for img_file in enumerate_images(paths[0:]):
