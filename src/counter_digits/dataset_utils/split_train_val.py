@@ -94,7 +94,7 @@ def main_tran_val_split():
     ds = DigitsDataset(rootDir)
 
     saveTo = 'train_split.txt', 'val_split.txt'
-    trainImages, valImages = ds.train_val_split(splitRatio=.8, saveTo=saveTo)
+    trainImages, valImages = ds.train_val_split(splitRatio=1, saveTo=saveTo)
     print(len(trainImages), len(valImages))
 
 

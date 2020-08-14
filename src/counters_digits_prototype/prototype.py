@@ -59,9 +59,8 @@ screenClass = 1
 def main():
     hideFromTitle = "/hdd/Datasets/counters/data"
     paths = [
-        # "/hdd/Datasets/counters/data/Musson_counters/train",
-        # "/hdd/Datasets/counters/data/Musson_counters/val",
-        "/hdd/Datasets/counters/data/Musson_counters_2",
+        # "/hdd/Datasets/counters/data/Musson_counters",
+        # "/hdd/Datasets/counters/data/Musson_counters_2",
         "/hdd/Datasets/counters/data/Musson_counters_3"
     ]
     pytorchScreenDetector, opencvScreenDetector, pytorchDigitsDetector, opencvDigitsDetector = createDetectors()
