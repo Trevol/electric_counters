@@ -35,12 +35,15 @@ class DarknetOpencvDetector:
         classIds = []
         confidences = []
         boxes = []
+        rawDetections = []
         for out in outs:
             for detection in out:
                 scores = detection[5:]
                 classId = np.argmax(scores)
                 confidence = scores[classId]
                 if confidence > confThreshold:
+                    rawDetections.append( (detection[:4], classId, confidence) )
+
                     center_x = int(detection[0] * frameWidth)
                     center_y = int(detection[1] * frameHeight)
                     width = int(detection[2] * frameWidth)
@@ -65,6 +68,7 @@ class DarknetOpencvDetector:
             height = box[3]
             detection = left, top, left + width, top + height, confidences[i], classIds[i]
             detections.append(detection)
+            print(rawDetections[i])
         return detections
 
     def detect(self, rgbImage):
