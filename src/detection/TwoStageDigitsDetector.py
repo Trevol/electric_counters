@@ -1,13 +1,10 @@
-from dataclasses import dataclass
-from typing import Callable, List, Union, Tuple
+from typing import List, Union, Tuple
+
+from trvo_utils.imutils import imgByBox
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.ObjectDetectionResult import ObjectDetectionResult
-
-
-@dataclass
-class TwoStageDigitsDetectionResult:
-    pass
+from detection.TwoStageDigitsDetectionResult import TwoStageDigitsDetectionResult
 
 
 class TwoStageDigitsDetector:
@@ -30,8 +27,14 @@ class TwoStageDigitsDetector:
 
     def detect(self, rgbImage) -> TwoStageDigitsDetectionResult:
         counterDetection, screenDetection = self._detectScreen(rgbImage)
+        if counterDetection is None and screenDetection is None:
+            return None
+        if screenDetection is None:
+            return TwoStageDigitsDetectionResult(
+                counterBox=counterDetection.box if counterDetection is not None else None)
 
         # extract screen image
+        imgByBox(rgbImage, screenDetection.box, )
         # detect digits
         # return
         #   counterBox,
