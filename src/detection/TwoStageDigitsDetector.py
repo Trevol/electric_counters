@@ -1,7 +1,13 @@
+from dataclasses import dataclass
 from typing import Callable, List, Union, Tuple
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.ObjectDetectionResult import ObjectDetectionResult
+
+
+@dataclass
+class TwoStageDigitsDetectionResult:
+    pass
 
 
 class TwoStageDigitsDetector:
@@ -12,7 +18,7 @@ class TwoStageDigitsDetector:
         self.screenDetector: DarknetOpencvDetector = screenDetector
         self.digitsDetector = digitsDetector
 
-    def _detectScreen(self, rgbImage):
+    def _detectScreen(self, rgbImage) -> Tuple[ObjectDetectionResult, ObjectDetectionResult]:
         detections = self.screenDetector.detect(rgbImage)
         counterDetections = list(filter(lambda d: d.classId == self.counterClass, detections))
         screenDetections = list(filter(lambda d: d.classId == self.screenClass, detections))
@@ -22,7 +28,7 @@ class TwoStageDigitsDetector:
         # extract counter and screen
         return _firstOrDefault(counterDetections), _firstOrDefault(screenDetections)
 
-    def detect(self, rgbImage):
+    def detect(self, rgbImage) -> TwoStageDigitsDetectionResult:
         counterDetection, screenDetection = self._detectScreen(rgbImage)
 
         # extract screen image
