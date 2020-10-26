@@ -4,7 +4,12 @@ import os
 from typing import Tuple
 
 import cv2
-from trvo_utils.imutils import imshowWait
+from trvo_utils.cv2gui_utils import imshowWait_WFK
+from trvo_utils.imutils import bgr2rgb
+
+from detection.DarknetOpencvDetector import DarknetOpencvDetector
+from consts import BGRColors
+from utils_local.vis_utils import drawDetections
 
 
 class DetectionLogDir:
@@ -41,11 +46,32 @@ class DetectionLogDir:
         pass
 
 
+def createDetectors():
+    cfg_file = '../counters/data/yolov3-tiny-2cls-320.cfg'
+    weights_file = '../counters/best_weights/yolov3-tiny-2cls/320/yolov3-tiny-2cls-320.weights'
+    yield DarknetOpencvDetector(cfg_file, weights_file, 320)
+
+    # cfg_file = '../counter_digits/data/yolov3-tiny-10cls-320.cfg'
+    cfg_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.cfg"
+    weights_file = '../counter_digits/best_weights/4/yolov3-tiny-10cls-320.4.weights'
+    # weights_file = "/home/trevol/Repos/Android/camera-samples/CameraXBasic/app/src/main/assets/yolov3-tiny-10cls-320.weights"
+    yield DarknetOpencvDetector(cfg_file, weights_file, 320)
+
+
 def main():
-    d = "/hdd/Datasets/counters/data/detections_log/1"
-    for inputPath in DetectionLogDir(d).inputFrames():
+    counter_screen_colors = {
+        0: BGRColors.green,
+        1: BGRColors.red
+    }
+    screenDetector, digitsDetector = createDetectors()
+    logsDir = "/hdd/Datasets/counters/data/detections_log/1"
+    for inputPath in DetectionLogDir(logsDir).inputFrames():
         img = cv2.imread(inputPath)
-        if imshowWait(img) == 27:
+
+        detections = screenDetector.detect(bgr2rgb(img))[0]
+        drawDetections(img, detections, counter_screen_colors, withScores=True)
+
+        if imshowWait_WFK(img, waitForKeys=[27, ord(' ')]) == 27:
             break
 
 

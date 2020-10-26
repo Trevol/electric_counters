@@ -1,13 +1,16 @@
+from typing import List
+
 import cv2
 import numpy as np
 from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import bgr2rgb, zeros, imgByBox, IMAGES_EXTENSIONS, enumerate_images
 from trvo_utils.path_utils import list_files
 
-from DarknetOpencvDetector import DarknetOpencvDetector
-from DarknetPytorchDetector import DarknetPytorchDetector
+from detection.DarknetOpencvDetector import DarknetOpencvDetector
+from detection.DarknetPytorchDetector import DarknetPytorchDetector
 from consts import FHD_SHAPE, BGRColors
 from counters_dataset_paths import paths
+from detection.ObjectDetectionResult import ObjectDetectionResult
 from utils_local.vis_utils import fitImageDetectionsToShape, drawDetections, drawDigitsDetections
 
 
@@ -25,23 +28,23 @@ def createDetectors():
     yield DarknetOpencvDetector(cfg_file, weights_file, 320)
 
 
-def extractObjectImage(desiredClass, img, detections, noImage=None, extraSpace=0):
-    desiredDetection = next(filter(lambda d: d[5] == desiredClass, detections), None)
+def extractObjectImage(desiredClass, img, detections: List[ObjectDetectionResult], noImage=None, extraSpace=0):
+    desiredDetection = next(filter(lambda d: d.classId == desiredClass, detections), None)
     if desiredDetection is None:
         return noImage
-    box = desiredDetection[:4]
+    box = desiredDetection.box
     objectImg = imgByBox(img, box, extraSpace).copy()
     return objectImg
 
 
-def doDetection(pytorchScreenDetector, pytorchDigitsDetector, imgRgb, imgBgr):
-    detections = pytorchScreenDetector.detect(imgRgb)[0]
+def doDetection(screenDetector, digitsDetector, imgRgb, imgBgr):
+    detections = screenDetector.detect(imgRgb)[0]
     screenImg = extractObjectImage(screenClass, imgBgr, detections, extraSpace=5)
 
     if screenImg is None:
         digitsImg = noScreenImage
     else:
-        digitDetections = pytorchDigitsDetector.detect(bgr2rgb(screenImg))[0]
+        digitDetections = digitsDetector.detect(bgr2rgb(screenImg))[0]
         digitsImg = drawDigitsDetections(screenImg, digitDetections, BGRColors.green)
 
     screenDetectionImg, detections, _ = fitImageDetectionsToShape(imgBgr, detections, FHD_SHAPE)

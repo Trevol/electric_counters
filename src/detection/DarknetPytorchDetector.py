@@ -1,7 +1,10 @@
+from typing import List
+
 import numpy as np
 import torch
 from trvo_utils.timer import timeit
 
+from detection.ObjectDetectionResult import ObjectDetectionResult
 from models import Darknet, load_darknet_weights
 from utils.datasets import letterbox
 from utils.utils import non_max_suppression, scale_coords
@@ -39,7 +42,7 @@ class DarknetPytorchDetector:
     def nms(predictions, conf_thres, iou_thres):
         return non_max_suppression(predictions, conf_thres, iou_thres, multi_label=False, classes=None, agnostic=True)
 
-    def detect(self, rgbImage):
+    def detect(self, rgbImage) -> List[ObjectDetectionResult]:
         input = self.preprocess(rgbImage, self.input_size).to(self.device)
         with torch.no_grad():
             pred = self.model(input)[0]
@@ -52,4 +55,6 @@ class DarknetPytorchDetector:
                 det[:, :4] = scale_coords(input.shape[2:], det[:, :4], rgbImage.shape).round()
         else:
             pred = [[]]
-        return pred
+
+        result = ObjectDetectionResult.fromDetections(pred)
+        return result

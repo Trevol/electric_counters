@@ -1,5 +1,9 @@
+from typing import List
+
 import cv2
 import numpy as np
+
+from detection.ObjectDetectionResult import ObjectDetectionResult
 from utils.datasets import letterbox
 
 
@@ -42,7 +46,7 @@ class DarknetOpencvDetector:
                 classId = np.argmax(scores)
                 confidence = scores[classId]
                 if confidence > confThreshold:
-                    rawDetections.append( (detection[:4], classId, confidence) )
+                    rawDetections.append((detection[:4], classId, confidence))
 
                     center_x = int(detection[0] * frameWidth)
                     center_y = int(detection[1] * frameHeight)
@@ -71,10 +75,10 @@ class DarknetOpencvDetector:
             print(rawDetections[i])
         return detections
 
-    def detect(self, rgbImage):
+    def detect(self, rgbImage) -> List[ObjectDetectionResult]:
         input = self.preprocess(rgbImage, self.input_size)
         self.model.setInput(input)
         outs = self.model.forward(self.modelOutputNames)
         detections = self.postprocess(rgbImage.shape[:2], outs, self.conf_thres, self.iou_thres)
-
-        return [detections]
+        result = ObjectDetectionResult.fromDetections(detections)
+        return result
