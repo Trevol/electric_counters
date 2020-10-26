@@ -2,6 +2,7 @@ from typing import List
 
 import cv2
 import numpy as np
+from trvo_utils.imutils import imHW
 
 from detection.ObjectDetectionResult import ObjectDetectionResult
 from utils.datasets import letterbox
@@ -72,13 +73,12 @@ class DarknetOpencvDetector:
             height = box[3]
             detection = left, top, left + width, top + height, confidences[i], classIds[i]
             detections.append(detection)
-            print(rawDetections[i])
         return detections
 
     def detect(self, rgbImage) -> List[ObjectDetectionResult]:
         input = self.preprocess(rgbImage, self.input_size)
         self.model.setInput(input)
         outs = self.model.forward(self.modelOutputNames)
-        detections = self.postprocess(rgbImage.shape[:2], outs, self.conf_thres, self.iou_thres)
+        detections = self.postprocess(imHW(rgbImage), outs, self.conf_thres, self.iou_thres)
         result = ObjectDetectionResult.fromDetections(detections)
         return result

@@ -48,13 +48,10 @@ class DarknetPytorchDetector:
             pred = self.model(input)[0]
 
         pred = self.nms(pred, self.conf_thres, self.iou_thres)
-
-        anyDetections = len(pred) > 0 and pred[0] is not None
-        if anyDetections:
-            for det in pred:
-                det[:, :4] = scale_coords(input.shape[2:], det[:, :4], rgbImage.shape).round()
-        else:
-            pred = [[]]
+        pred = pred[0]
+        if pred is None:
+            return []
+        pred[:, :4] = scale_coords(input.shape[2:], pred[:, :4], rgbImage.shape).round()
 
         result = ObjectDetectionResult.fromDetections(pred)
         return result

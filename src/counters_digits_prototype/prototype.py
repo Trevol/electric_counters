@@ -12,6 +12,10 @@ from consts import FHD_SHAPE, BGRColors
 from counters_dataset_paths import paths
 from detection.ObjectDetectionResult import ObjectDetectionResult
 from utils_local.vis_utils import fitImageDetectionsToShape, drawDetections, drawDigitsDetections
+from with_image_aligning.frame_reader import FrameReader
+
+noScreenImage = zeros((50, 150))
+screenClass = 1
 
 
 def createDetectors():
@@ -38,13 +42,13 @@ def extractObjectImage(desiredClass, img, detections: List[ObjectDetectionResult
 
 
 def doDetection(screenDetector, digitsDetector, imgRgb, imgBgr):
-    detections = screenDetector.detect(imgRgb)[0]
+    detections = screenDetector.detect(imgRgb)
     screenImg = extractObjectImage(screenClass, imgBgr, detections, extraSpace=5)
 
     if screenImg is None:
         digitsImg = noScreenImage
     else:
-        digitDetections = digitsDetector.detect(bgr2rgb(screenImg))[0]
+        digitDetections = digitsDetector.detect(bgr2rgb(screenImg))
         digitsImg = drawDigitsDetections(screenImg, digitDetections, BGRColors.green)
 
     screenDetectionImg, detections, _ = fitImageDetectionsToShape(imgBgr, detections, FHD_SHAPE)
@@ -56,11 +60,7 @@ def doDetection(screenDetector, digitsDetector, imgRgb, imgBgr):
     return screenDetectionImg, digitsImg
 
 
-noScreenImage = zeros((50, 150))
-screenClass = 1
-
-
-def main():
+def main_():
     hideFromTitle = "/hdd/Datasets/counters/data"
     paths = [
         # "/hdd/Datasets/counters/data/5_from_phone",
@@ -72,6 +72,7 @@ def main():
     pytorchScreenDetector, opencvScreenDetector, pytorchDigitsDetector, opencvDigitsDetector = createDetectors()
     for img_file in enumerate_images(paths[0:]):
         imgBgr = cv2.imread(img_file)
+        # imgBgr = np.zeros_like(imgBgr)
         imgRgb = bgr2rgb(imgBgr)
         pytorchDetectionsImgs = doDetection(pytorchScreenDetector, pytorchDigitsDetector, imgRgb, imgBgr.copy())
         opencvDetectionsImgs = doDetection(opencvScreenDetector, opencvDigitsDetector, imgRgb, imgBgr)
@@ -82,6 +83,20 @@ def main():
             break
         elif key == ord('a'):
             print('Need to annotate', img_file)
+
+
+def main():
+    pytorchScreenDetector, opencvScreenDetector, pytorchDigitsDetector, opencvDigitsDetector = createDetectors()
+
+    frames = FrameReader("../../images/smooth_frames/1/*.jpg", 1).read()
+    for imgBgr, imgGray in frames:
+        imgRgb = bgr2rgb(imgBgr)
+        pytorchDetectionsImgs = doDetection(pytorchScreenDetector, pytorchDigitsDetector, imgRgb, imgBgr.copy())
+        opencvDetectionsImgs = doDetection(opencvScreenDetector, opencvDigitsDetector, imgRgb, imgBgr)
+        key = imshowWait([pytorchDetectionsImgs[0], 'trch'], [pytorchDetectionsImgs[1], 'trch'],
+                         [opencvDetectionsImgs[0], 'opcv'], [opencvDetectionsImgs[1], 'opcv'])
+        if key == 27:
+            break
 
 
 if __name__ == '__main__':

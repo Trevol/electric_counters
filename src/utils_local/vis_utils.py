@@ -57,8 +57,8 @@ def scaleDetections(detections: List[ObjectDetectionResult], scale):
     if scale == 1:
         return detections
     detections = [
-        ObjectDetectionResult.fromDetection([*scaleBox(box, scale), score, klass])
-        for *box, score, klass
+        ObjectDetectionResult(d.classId, d.classScore, scaleBox(d.box, scale))
+        for d
         in detections
     ]
     return detections
