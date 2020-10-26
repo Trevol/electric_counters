@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-from trvo_utils.imutils import imshowWait, bgr2rgb, zeros, imgByBox, IMAGES_EXTENSIONS, enumerate_images
+from trvo_utils.cv2gui_utils import imshowWait
+from trvo_utils.imutils import bgr2rgb, zeros, imgByBox, IMAGES_EXTENSIONS, enumerate_images
 from trvo_utils.path_utils import list_files
 
 from DarknetOpencvDetector import DarknetOpencvDetector
