@@ -1,10 +1,13 @@
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Iterable
+import numpy as np
 
+from trvo_utils.box_utils import expandBox
 from trvo_utils.imutils import imgByBox
+from trvo_utils.iter_utils import firstOrDefault
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.ObjectDetectionResult import ObjectDetectionResult
-from detection.TwoStageDigitsDetectionResult import TwoStageDigitsDetectionResult
+from detection.TwoStageDigitsDetectionResult import TwoStageDigitsDetectionResult, DigitDetection
 
 
 class TwoStageDigitsDetector:
@@ -13,7 +16,7 @@ class TwoStageDigitsDetector:
 
     def __init__(self, screenDetector, digitsDetector):
         self.screenDetector: DarknetOpencvDetector = screenDetector
-        self.digitsDetector = digitsDetector
+        self.digitsDetector: DarknetOpencvDetector = digitsDetector
 
     def _detectScreen(self, rgbImage) -> Tuple[ObjectDetectionResult, ObjectDetectionResult]:
         detections = self.screenDetector.detect(rgbImage)
@@ -23,31 +26,53 @@ class TwoStageDigitsDetector:
         assert len(counterDetections) <= 1
         assert len(screenDetections) <= 1
         # extract counter and screen
-        return _firstOrDefault(counterDetections), _firstOrDefault(screenDetections)
+        return firstOrDefault(counterDetections), firstOrDefault(screenDetections)
 
     def detect(self, rgbImage) -> TwoStageDigitsDetectionResult:
         counterDetection, screenDetection = self._detectScreen(rgbImage)
         if counterDetection is None and screenDetection is None:
             return None
+        if counterDetection is None:
+            counterBox, counterScore = None, None
+        else:
+            counterBox, counterScore = counterDetection.box, counterDetection.classScore
+
         if screenDetection is None:
             return TwoStageDigitsDetectionResult(
-                counterBox=counterDetection.box if counterDetection is not None else None)
-
-        # extract screen image
-        imgByBox(rgbImage, screenDetection.box, )
-        # detect digits
-        # return
-        #   counterBox,
-        #   screenBox,
-        #   screenImage - do we really need this?????
-        #   digits:
-        #       boxInScreen - coordinates relative to screenBox
-        #       boxInImage - with coordinates relative to image
-        #       class - 0, 1, 2, 3, ... 9
-        pass
+                counterBox=counterBox,
+                counterScore=counterScore
+            )
 
 
-def _firstOrDefault(src: Union[List, Tuple], default=None):
-    if len(src) == 0:
-        return default
-    return src[0]
+        adjustedScreenBox = expandBox(screenDetection.box, .2, relative=True)
+        screenImg = imgByBox(rgbImage, adjustedScreenBox)
+
+        digitsDetections = self.digitsDetector.detect(screenImg)
+
+        digitsDetections = [
+            DigitDetection(
+                digit=d.classId,
+                score=d.classScore,
+                boxInScreenBox=d.box,
+                boxInImage=remapBox(d.box, adjustedScreenBox)
+            )
+            for d in digitsDetections
+        ]
+
+        return TwoStageDigitsDetectionResult(
+            counterBox=counterBox,
+            counterScore=counterScore,
+            screenBox=adjustedScreenBox,
+            screenScore=screenDetection.classScore,
+            digitDetections=digitsDetections
+        )
+
+
+def remapBox(box: np.ndarray, fromBox):
+    # box holds x1y1x2y2-coords in fromBox
+    # fromBox holds x1y1x2y2-coords in other Box
+    # result is box with coords in other Box
+    # example: digit box in screenBox remat to image box
+    fromBox_topLeft = fromBox[:2]
+    # for each point of box add displacement (top left point of fromBox)
+    return box + np.append(fromBox_topLeft, fromBox_topLeft)

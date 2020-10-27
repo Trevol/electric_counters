@@ -1,5 +1,7 @@
+import cv2
+from trvo_utils import toInt_array
 from trvo_utils.cv2gui_utils import imshowWait
-from trvo_utils.imutils import bgr2rgb
+from trvo_utils.imutils import bgr2rgb, imgByBox
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.TwoStageDigitsDetector import TwoStageDigitsDetector
@@ -24,10 +26,22 @@ def main():
 
     screenDetector, digitsDetector = createDetectors()
     detector = TwoStageDigitsDetector(screenDetector, digitsDetector)
-    for imgBgr, imgGray in frames:
+    for i, (imgBgr, imgGray) in enumerate(frames):
         imgRgb = bgr2rgb(imgBgr)
         detection = detector.detect(imgRgb)
-        key = imshowWait(imgBgr)
+
+        if detection is not None and detection.screenBox is not None:
+            screenImg = imgByBox(imgBgr, detection.screenBox)
+            green = (0, 255, 0)
+            for d in detection.digitDetections:
+                x1, y1, x2, y2 = toInt_array(d.boxInImage)
+                cv2.rectangle(imgBgr, (x1, y1), (x2, y2), green, 1)
+                x1, y1, x2, y2 = toInt_array(d.boxInScreenBox)
+                cv2.rectangle(screenImg, (x1, y1), (x2, y2), green, 1)
+        else:
+            screenImg = None
+
+        key = imshowWait([imgBgr, i], screenImg)
         if key == 27:
             break
 
