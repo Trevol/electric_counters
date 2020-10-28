@@ -22,7 +22,7 @@ class TwoStageDigitsDetector:
         detections = self.screenDetector.detect(rgbImage)
         counterDetections = list(filter(lambda d: d.classId == self.counterClass, detections))
         screenDetections = list(filter(lambda d: d.classId == self.screenClass, detections))
-        # TODO: если
+        # TODO: если больше 2 обнаружений - выбирать те, которые ближе к центру изображения
         assert len(counterDetections) <= 1
         assert len(screenDetections) <= 1
         # extract counter and screen
@@ -43,7 +43,6 @@ class TwoStageDigitsDetector:
                 counterScore=counterScore
             )
 
-
         adjustedScreenBox = expandBox(screenDetection.box, .2, relative=True)
         screenImg = imgByBox(rgbImage, adjustedScreenBox)
 
@@ -53,7 +52,6 @@ class TwoStageDigitsDetector:
             DigitDetection(
                 digit=d.classId,
                 score=d.classScore,
-                boxInScreenBox=d.box,
                 boxInImage=remapBox(d.box, adjustedScreenBox)
             )
             for d in digitsDetections

@@ -8,7 +8,6 @@ import numpy as np
 class DigitDetection:
     digit: int
     score: float
-    boxInScreenBox: np.ndarray
     boxInImage: np.ndarray
 
 
