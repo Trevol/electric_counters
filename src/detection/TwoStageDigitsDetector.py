@@ -31,7 +31,7 @@ class TwoStageDigitsDetector:
     def detect(self, rgbImage) -> TwoStageDigitsDetectionResult:
         counterDetection, screenDetection = self._detectScreen(rgbImage)
         if counterDetection is None and screenDetection is None:
-            return None
+            return TwoStageDigitsDetectionResult(empty=True)
         if counterDetection is None:
             counterBox, counterScore = None, None
         else:

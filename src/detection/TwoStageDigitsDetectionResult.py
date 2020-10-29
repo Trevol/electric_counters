@@ -13,6 +13,7 @@ class DigitDetection:
 
 @dataclass
 class TwoStageDigitsDetectionResult:
+    empty: bool = False
     counterBox: np.ndarray = None
     counterScore: float = None
     screenBox: np.ndarray = None
