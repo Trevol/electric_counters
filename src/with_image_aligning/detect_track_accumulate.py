@@ -1,13 +1,16 @@
+from builtins import sum
+from itertools import groupby
 from typing import List
 
 import cv2
 import numpy as np
 
 from trvo_utils import toInt_array
-from trvo_utils.box_utils import pointInBox
+from trvo_utils.box_utils import pointInBox, boxCenter
 from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import bgr2rgb, imgByBox
 from trvo_utils.optFlow_trackers import RectTracker
+from trvo_utils.timer import timeit
 from trvo_utils.viz_utils import make_bgr_colors
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
@@ -20,29 +23,56 @@ class Draw:
     numOfDigits = 10
     colors = make_bgr_colors(numOfDigits)
 
+    @staticmethod
+    def rectangle(img, box, color, thickness=1):
+        x1, y1, x2, y2 = toInt_array(box)
+        return cv2.rectangle(img, (x1, y1), (x2, y2), color, thickness)
+
+    @staticmethod
+    def rectangleCenter(img, box, color, radius=1, thickness=-1):
+        center = tuple(toInt_array(boxCenter(box)))
+        return cv2.circle(img, center, radius, color, thickness)
+
     @classmethod
-    def digitDetections(cls, img, currentDetections: List[DigitDetection],
-                        trackedDetections: List[DigitDetection]):
-        allDetections = currentDetections + trackedDetections
-        for d in allDetections:
-            x1, y1, x2, y2 = toInt_array(d.boxInImage)
+    def digitDetections(cls, img,
+                        detections: List[DigitDetection],
+                        showAsCenters):
+        for d in detections:
             digitColor = cls.colors[d.digit]
-            cv2.rectangle(img, (x1, y1), (x2, y2), digitColor, 1)
+            if showAsCenters:
+                cls.rectangleCenter(img, d.boxInImage, digitColor)
+            else:
+                cls.rectangle(img, d.boxInImage, digitColor)
+        return img
 
 
 class Show:
     @staticmethod
     def digitDetections(frame, framePos,
-                        currentDetections: List[DigitDetection],
-                        trackedDetections: List[DigitDetection]):
-        Draw.digitDetections(frame, currentDetections, trackedDetections)
-        key = imshowWait([frame, framePos])
+                        detections: List[DigitDetection],
+                        showAsCenters):
+        vis = Draw.digitDetections(frame.copy(), detections, showAsCenters)
+        key = imshowWait([vis, framePos], frame)
         if key == 27:
             return 'esc'
 
 
+def groupBy_count_desc(items):
+    def count_(items):
+        return sum(1 for _ in items)
+
+    def countGroup(group_items):
+        return group_items[0], count_(group_items[1])
+
+    def countSelector(group_count):
+        return group_count[1]
+
+    grpBy = groupby(sorted(items))
+    return sorted(map(countGroup, grpBy), key=countSelector, reverse=True)
+
+
 class PrototypeApp:
-    framesPath = "../../images/smooth_frames/1/*.jpg"
+    framesPath = "../../images/smooth_frames/2/*.jpg"
     rectTracker = RectTracker()
 
     @staticmethod
@@ -88,7 +118,8 @@ class PrototypeApp:
                 return
             pt = x, y
             digitsOnPoint = [d.digit for d in prevDetections if pointInBox(d.boxInImage, pt)]
-            print(digitsOnPoint)
+            stats = groupBy_count_desc(digitsOnPoint)
+            print(stats)
 
         cv2.namedWindow("0")
         cv2.setMouseCallback("0", mouseCallback)
@@ -96,16 +127,19 @@ class PrototypeApp:
         prevDetections = []
         prevFrameGray = None
         for framePos, frameBgr, frameRgb, frameGray in self.frames():
-            currentDetections = detector.detect(frameRgb).digitDetections
-            trackedDetections = []
-            if len(prevDetections) != 0:
-                trackedDetections = self.trackDigitDetections(prevFrameGray, frameGray, prevDetections)
+            with timeit(f"{framePos}"):
+                currentDetections = detector.detect(frameRgb).digitDetections
+                trackedDetections = []
+                if len(prevDetections) != 0:
+                    trackedDetections = self.trackDigitDetections(prevFrameGray, frameGray, prevDetections)
 
-            prevDetections = trackedDetections + currentDetections
-            prevFrameGray = frameGray
+                prevDetections = trackedDetections + currentDetections
+                prevFrameGray = frameGray
 
-            if Show.digitDetections(frameBgr, framePos, currentDetections, trackedDetections) == 'esc':
+            if Show.digitDetections(frameBgr, framePos, prevDetections,
+                                    showAsCenters=True) == 'esc':
                 break
+
 
 
 PrototypeApp().run()
