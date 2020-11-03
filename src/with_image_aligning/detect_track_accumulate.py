@@ -16,6 +16,7 @@ from trvo_utils.viz_utils import make_bgr_colors
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.TwoStageDigitsDetectionResult import TwoStageDigitsDetectionResult, DigitDetection
 from detection.TwoStageDigitsDetector import TwoStageDigitsDetector, remapBox
+from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor
 from with_image_aligning.frame_reader import FrameReader
 
 
@@ -45,6 +46,13 @@ class Draw:
                 cls.rectangle(img, d.boxInImage, digitColor)
         return img
 
+    @staticmethod
+    def clustersCenters(img, centers):
+        for center in centers:
+            center = tuple(toInt_array(center))
+            cv2.circle(img, center, 1, (0, 255, 0), -1)
+        return img
+
 
 class Show:
     @staticmethod
@@ -52,6 +60,13 @@ class Show:
                         detections: List[DigitDetection],
                         showAsCenters):
         vis = Draw.digitDetections(frame.copy(), detections, showAsCenters)
+        key = imshowWait([vis, framePos], frame)
+        if key == 27:
+            return 'esc'
+
+    @staticmethod
+    def clustersCenters(frame, framePos, centers):
+        vis = Draw.clustersCenters(frame.copy(), centers)
         key = imshowWait([vis, framePos], frame)
         if key == 27:
             return 'esc'
@@ -112,6 +127,7 @@ class PrototypeApp:
 
     def run(self):
         detector = self.createDetector()
+        digitExtractor = ClusteringDigitsExtractor()
 
         def mouseCallback(event, x, y, flags, userdata):
             if event != cv2.EVENT_LBUTTONDOWN:
@@ -127,19 +143,22 @@ class PrototypeApp:
         prevDetections = []
         prevFrameGray = None
         for framePos, frameBgr, frameRgb, frameGray in self.frames():
-            with timeit(f"{framePos}"):
-                currentDetections = detector.detect(frameRgb).digitDetections
-                trackedDetections = []
-                if len(prevDetections) != 0:
-                    trackedDetections = self.trackDigitDetections(prevFrameGray, frameGray, prevDetections)
+            currentDetections = detector.detect(frameRgb).digitDetections
+            trackedDetections = []
+            if len(prevDetections) != 0:
+                trackedDetections = self.trackDigitDetections(prevFrameGray, frameGray, prevDetections)
 
-                prevDetections = trackedDetections + currentDetections
-                prevFrameGray = frameGray
+            prevDetections = trackedDetections + currentDetections
+            prevFrameGray = frameGray
 
-            if Show.digitDetections(frameBgr, framePos, prevDetections,
-                                    showAsCenters=True) == 'esc':
+            centers = digitExtractor.extract(prevDetections)
+            print(framePos, len(centers))
+            if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
                 break
 
+            # if Show.digitDetections(frameBgr, framePos, prevDetections,
+            #                         showAsCenters=True) == 'esc':
+            #     break
 
 
 PrototypeApp().run()
