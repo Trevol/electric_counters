@@ -87,8 +87,13 @@ def groupBy_count_desc(items):
 
 
 class PrototypeApp:
-    framesPath = "../../images/smooth_frames/2/*.jpg"
     rectTracker = RectTracker()
+
+    @staticmethod
+    def saveDetections(detections, file):
+        from pickle import dump, HIGHEST_PROTOCOL
+        with open(file, "wb") as f:
+            dump(detections, f, HIGHEST_PROTOCOL)
 
     @staticmethod
     def createDetector():
@@ -111,7 +116,8 @@ class PrototypeApp:
         return digitBoxInScreenBox
 
     def frames(self):
-        frames = enumerate(FrameReader(self.framesPath, 1).read())
+        framesPath = "../../images/smooth_frames/2/*.jpg"
+        frames = enumerate(FrameReader(framesPath, 1).read())
         frames = ((pos, bgr, bgr2rgb(bgr), gray) for pos, (bgr, gray) in frames)
         return frames
 
@@ -144,6 +150,7 @@ class PrototypeApp:
         prevFrameGray = None
         for framePos, frameBgr, frameRgb, frameGray in self.frames():
             currentDetections = detector.detect(frameRgb).digitDetections
+            # TODO: count number of frames from first observation (detection)
             trackedDetections = []
             if len(prevDetections) != 0:
                 trackedDetections = self.trackDigitDetections(prevFrameGray, frameGray, prevDetections)
@@ -151,14 +158,15 @@ class PrototypeApp:
             prevDetections = trackedDetections + currentDetections
             prevFrameGray = frameGray
 
-            centers = digitExtractor.extract(prevDetections)
-            print(framePos, len(centers))
-            if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
+            # centers = digitExtractor.extractCenters_(prevDetections)
+            # print(framePos, len(centers))
+            # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
+            #     break
+
+            if Show.digitDetections(frameBgr, framePos, prevDetections,
+                                    showAsCenters=False) == 'esc':
                 break
 
-            # if Show.digitDetections(frameBgr, framePos, prevDetections,
-            #                         showAsCenters=True) == 'esc':
-            #     break
 
 
 PrototypeApp().run()

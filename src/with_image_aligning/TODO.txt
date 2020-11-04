@@ -1,0 +1,8 @@
+Clustering
+- google "opencv dbscan"
+- https://stackoverflow.com/questions/23842940/clustering-image-segments-in-opencv
+- https://answers.opencv.org/question/27897/creating-regions-of-interest-roi-by-clustering-fragmented-contours/
+- https://stackoverflow.com/questions/17157296/detecting-clusters-of-white-pixels-in-an-image-using-opencv
+Box NMS
+- https://www.pyimagesearch.com/2014/11/17/non-maximum-suppression-object-detection-python/
+- https://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
