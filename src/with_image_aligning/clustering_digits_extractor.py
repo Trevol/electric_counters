@@ -34,7 +34,7 @@ class ClusteringDigitsExtractor:
         clusters = self.clusterer.labels_
         probs = self.clusterer.probabilities_
 
-        result = list()
+        digitsAtPoints = list()
         clusteredDetections = sorted(
             (o for o in zip(clusters, detections, probs) if self._cluster(o) != -1),
             key=self._cluster)
@@ -55,9 +55,11 @@ class ClusteringDigitsExtractor:
             assert len(digit_count) > 0
 
             digit = max(digit_count.items(), key=itemgetter(1))[0]
-            result.append(DigitAtPoint(digit, center))
+            digitsAtPoints.append(DigitAtPoint(digit, center))
 
-        return result
+        # sort by point.x
+        digitsAtPoints.sort(key=lambda d: d.point[0])
+        return digitsAtPoints
 
     def calc_digit_at_point(self):
         pass

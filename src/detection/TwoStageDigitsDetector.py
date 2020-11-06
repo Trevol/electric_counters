@@ -23,8 +23,8 @@ class TwoStageDigitsDetector:
         counterDetections = list(filter(lambda d: d.classId == self.counterClass, detections))
         screenDetections = list(filter(lambda d: d.classId == self.screenClass, detections))
         # TODO: если больше 2 обнаружений - выбирать те, которые ближе к центру изображения
-        assert len(counterDetections) <= 1
-        assert len(screenDetections) <= 1
+        # assert len(counterDetections) <= 1, f"len(counterDetections)={len(counterDetections)}"
+        assert len(screenDetections) <= 1, f"len(screenDetections)={len(screenDetections)}"
         # extract counter and screen
         return firstOrDefault(counterDetections), firstOrDefault(screenDetections)
 
@@ -70,7 +70,7 @@ def remapBox(box: np.ndarray, fromBox):
     # box holds x1y1x2y2-coords in fromBox
     # fromBox holds x1y1x2y2-coords in other Box
     # result is box with coords in other Box
-    # example: digit box in screenBox remat to image box
+    # example: digit box in screenBox remap to image box
     fromBox_topLeft = fromBox[:2]
     # for each point of box add displacement (top left point of fromBox)
     return box + np.append(fromBox_topLeft, fromBox_topLeft)

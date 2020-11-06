@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 from trvo_utils import toInt_array
-from trvo_utils.box_utils import pointInBox, boxCenter
+from trvo_utils.box_utils import pointInBox, boxCenter, boxSizeWH
 from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import bgr2rgb, imgByBox
 from trvo_utils.optFlow_trackers import RectTracker
@@ -115,8 +115,8 @@ class PrototypeApp:
         digitBoxInScreenBox = digitBoxInImage - np.append(tl, tl)
         return digitBoxInScreenBox
 
-    def frames(self):
-        framesPath = "../../images/smooth_frames/2/*.jpg"
+    @staticmethod
+    def frames(framesPath):
         frames = enumerate(FrameReader(framesPath, 1).read())
         frames = ((pos, bgr, bgr2rgb(bgr), gray) for pos, (bgr, gray) in frames)
         return frames
@@ -125,11 +125,35 @@ class PrototypeApp:
                              prevDetections: List[DigitDetection]) -> List[DigitDetection]:
         prevBoxes = [d.boxInImage for d in prevDetections]
         boxes, status = self.rectTracker.track(prevFrameGray, nextFrameGray, prevBoxes)
+
         nextDetections = []
-        for d, box, boxStatus in zip(prevDetections, boxes, status):
-            # TODO: check box status
-            nextDetections.append(DigitDetection(d.digit, d.score, box))
+        for prevDetection, box, boxStatus in zip(prevDetections, boxes, status):
+            if not boxStatus or self.isAbnormalTrack(prevDetection.boxInImage, box):
+                continue
+            nextDetections.append(DigitDetection(prevDetection.digit, prevDetection.score, box))
         return nextDetections
+
+    @staticmethod
+    def isAbnormalTrack(prevBox, nextBox):
+        x1 = nextBox[0]
+        y1 = nextBox[1]
+        x2 = nextBox[2]
+        y2 = nextBox[3]
+        if x1 >= x2 or y1 >= y2:
+            return True
+        # TODO: compare nextBox pt1 and pt2 flows - should be similar
+        # flow = nextBox - prevBox
+
+        # measure sides
+        # prevBoxWH = boxSizeWH(prevBox)
+        # nextBoxWH = boxSizeWH(nextBox)
+        # wRatio = prevBoxWH[0] / nextBoxWH[0]
+        # hRatio = prevBoxWH[1] / nextBoxWH[1]
+        # isNormalRatio = 1.15 > wRatio > .85 and 1.15 > hRatio > .85
+        # if not isNormalRatio:
+        #     return True
+
+        return False
 
     def run(self):
         detector = self.createDetector()
@@ -148,15 +172,19 @@ class PrototypeApp:
 
         prevDetections = []
         prevFrameGray = None
-        for framePos, frameBgr, frameRgb, frameGray in self.frames():
+
+        framesPath = "../../images/smooth_frames/1/*.jpg"
+        for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath):
+            # print(framePos)
             currentDetections = detector.detect(frameRgb).digitDetections
-            # TODO: count number of frames from first observation (detection)
             trackedDetections = []
             if len(prevDetections) != 0:
                 trackedDetections = self.trackDigitDetections(prevFrameGray, frameGray, prevDetections)
 
             prevDetections = trackedDetections + currentDetections
             prevFrameGray = frameGray
+
+            digitsAtPoints = digitExtractor.extract(prevDetections, -1)
 
             # centers = digitExtractor.extractCenters_(prevDetections)
             # print(framePos, len(centers))
@@ -167,6 +195,7 @@ class PrototypeApp:
                                     showAsCenters=False) == 'esc':
                 break
 
+        # self.saveDetections(prevDetections, "digit_detections_1.pcl")
 
 
 PrototypeApp().run()

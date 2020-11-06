@@ -1,4 +1,10 @@
-from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor
+from typing import List
+
+import cv2
+import numpy as np
+from trvo_utils.cv2gui_utils import imshowWait
+
+from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor, DigitAtPoint
 
 
 def loadDetections():
@@ -8,16 +14,27 @@ def loadDetections():
         return load(f), numOfObservations
 
 
+def showDigits(digitsAtPoints: List[DigitAtPoint]):
+    if len(digitsAtPoints) == 0:
+        return
+    maxX = int(max(digitsAtPoints, key=lambda d: d.point[0]).point[0])
+    maxY = int(max(digitsAtPoints, key=lambda d: d.point[1]).point[1])
+    img = np.full([maxY + 100, maxX + 100], 127, np.uint8)
+    for digitAtPoint in digitsAtPoints:
+        cv2.putText(img, str(digitAtPoint.digit), tuple(np.int32(digitAtPoint.point)), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+    imshowWait(img)
+
+
 def main():
     detections, numOfObservations = loadDetections()
     extractor = ClusteringDigitsExtractor()
     digitsAtPoints = extractor.extract(detections, numOfObservations)
-    # TODO: sort by point.x
-    digitsAtPoints.sort(key=lambda d: d.point[0])
+
     # TODO: visualize
     for digitAtPoint in digitsAtPoints:
         print(digitAtPoint.digit, digitAtPoint.point)
 
+    showDigits(digitsAtPoints)
 
 
 main()
