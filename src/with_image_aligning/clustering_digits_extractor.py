@@ -26,9 +26,12 @@ class ClusteringDigitsExtractor:
         return cluster_obj[0]
 
     def extract(self, detections: List[DigitDetection], numOfObservations) -> List[DigitAtPoint]:
+        if len(detections) < 3:
+            return list()
         # cluster by box centers
         centers = [boxCenter(d.boxInImage) for d in detections]
         centers = np.float32(centers)
+
         self.clusterer.fit(centers)
 
         clusters = self.clusterer.labels_

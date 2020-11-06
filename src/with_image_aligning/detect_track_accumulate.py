@@ -16,7 +16,7 @@ from trvo_utils.viz_utils import make_bgr_colors
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.TwoStageDigitsDetectionResult import TwoStageDigitsDetectionResult, DigitDetection
 from detection.TwoStageDigitsDetector import TwoStageDigitsDetector, remapBox
-from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor
+from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor, DigitAtPoint
 from with_image_aligning.frame_reader import FrameReader
 
 
@@ -53,14 +53,30 @@ class Draw:
             cv2.circle(img, center, 1, (0, 255, 0), -1)
         return img
 
+    green = 0, 255, 0
+
+    @classmethod
+    def digitsAtPoints(cls, img, digitsAtPoints: List[DigitAtPoint]):
+        if len(digitsAtPoints) == 0:
+            return None
+        # TODO: digit center should be at digitAtPoint.point
+        # TODO: digit dimension should be like digit box (average)
+        for digitAtPoint in digitsAtPoints:
+            digitTxt = str(digitAtPoint.digit)
+            textPt = tuple(np.int32(digitAtPoint.point))
+            cv2.putText(img, digitTxt, textPt, cv2.FONT_HERSHEY_SIMPLEX, 1, cls.green)
+        return img
+
 
 class Show:
     @staticmethod
     def digitDetections(frame, framePos,
                         detections: List[DigitDetection],
+                        digitsAtPoints: List[DigitAtPoint],
                         showAsCenters):
-        vis = Draw.digitDetections(frame.copy(), detections, showAsCenters)
-        key = imshowWait([vis, framePos], frame)
+        detectionsImg = Draw.digitDetections(frame.copy(), detections, showAsCenters)
+        digitsImg = Draw.digitsAtPoints(frame.copy(), digitsAtPoints)
+        key = imshowWait([detectionsImg, framePos], frame, digitsImg)
         if key == 27:
             return 'esc'
 
@@ -173,7 +189,7 @@ class PrototypeApp:
         prevDetections = []
         prevFrameGray = None
 
-        framesPath = "../../images/smooth_frames/1/*.jpg"
+        framesPath = "../../images/smooth_frames/4/*.jpg"
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath):
             # print(framePos)
             currentDetections = detector.detect(frameRgb).digitDetections
@@ -191,7 +207,7 @@ class PrototypeApp:
             # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
             #     break
 
-            if Show.digitDetections(frameBgr, framePos, prevDetections,
+            if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
                                     showAsCenters=False) == 'esc':
                 break
 

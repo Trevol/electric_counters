@@ -30,10 +30,6 @@ def main():
     extractor = ClusteringDigitsExtractor()
     digitsAtPoints = extractor.extract(detections, numOfObservations)
 
-    # TODO: visualize
-    for digitAtPoint in digitsAtPoints:
-        print(digitAtPoint.digit, digitAtPoint.point)
-
     showDigits(digitsAtPoints)
 
 
