@@ -14,14 +14,28 @@ def loadDetections():
         return load(f), numOfObservations
 
 
+def getFontScale(text, fontFace, desiredHeight, thickness):
+    fontScale = 20
+    (w, h), _ = cv2.getTextSize(text, fontFace, fontScale, thickness)
+    return fontScale * desiredHeight / h
+
+
+
 def showDigits(digitsAtPoints: List[DigitAtPoint]):
     if len(digitsAtPoints) == 0:
         return
     maxX = int(max(digitsAtPoints, key=lambda d: d.point[0]).point[0])
     maxY = int(max(digitsAtPoints, key=lambda d: d.point[1]).point[1])
     img = np.full([maxY + 100, maxX + 100], 127, np.uint8)
+
+    fontFace = cv2.FONT_HERSHEY_SIMPLEX
+    fontThickness = 1
+    fontScale = getFontScale("1", fontFace, 30, fontThickness)
+
     for digitAtPoint in digitsAtPoints:
-        cv2.putText(img, str(digitAtPoint.digit), tuple(np.int32(digitAtPoint.point)), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+        digitStr = str(digitAtPoint.digit)
+        textPt = tuple(np.int32(digitAtPoint.point))
+        cv2.putText(img, digitStr, textPt, fontFace, fontScale, 255, fontThickness)
     imshowWait(img)
 
 

@@ -20,9 +20,20 @@ from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtr
 from with_image_aligning.frame_reader import FrameReader
 
 
+def getFontScale(text, fontFace, desiredHeight, thickness):
+    fontScale = 20
+    (w, h), _ = cv2.getTextSize(text, fontFace, fontScale, thickness)
+    return fontScale * desiredHeight / h
+
+
 class Draw:
     numOfDigits = 10
     colors = make_bgr_colors(numOfDigits)
+    fontFace = cv2.FONT_HERSHEY_SIMPLEX
+    fontThickness = 1
+    fontScale_15px = getFontScale("1", fontFace, 15, fontThickness)
+    (fontWH_15px), _ = cv2.getTextSize("1", fontFace, fontScale_15px, fontThickness)
+    fontWH_15px = np.float32(fontWH_15px)
 
     @staticmethod
     def rectangle(img, box, color, thickness=1):
@@ -63,8 +74,11 @@ class Draw:
         # TODO: digit dimension should be like digit box (average)
         for digitAtPoint in digitsAtPoints:
             digitTxt = str(digitAtPoint.digit)
-            textPt = tuple(np.int32(digitAtPoint.point))
-            cv2.putText(img, digitTxt, textPt, cv2.FONT_HERSHEY_SIMPLEX, 1, cls.green)
+            #
+            textPt = digitAtPoint.point + (cls.fontWH_15px / 2) * [-1, 1]
+            textPt = tuple(np.int32(textPt))
+            # TODO: calc textPt
+            cv2.putText(img, digitTxt, textPt, cls.fontFace, cls.fontScale_15px, cls.green, cls.fontThickness)
         return img
 
 
