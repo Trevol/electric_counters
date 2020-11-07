@@ -70,14 +70,11 @@ class Draw:
     def digitsAtPoints(cls, img, digitsAtPoints: List[DigitAtPoint]):
         if len(digitsAtPoints) == 0:
             return None
-        # TODO: digit center should be at digitAtPoint.point
-        # TODO: digit dimension should be like digit box (average)
         for digitAtPoint in digitsAtPoints:
             digitTxt = str(digitAtPoint.digit)
-            #
+            # TODO: precalculate or move to separate class
             textPt = digitAtPoint.point + (cls.fontWH_15px / 2) * [-1, 1]
             textPt = tuple(np.int32(textPt))
-            # TODO: calc textPt
             cv2.putText(img, digitTxt, textPt, cls.fontFace, cls.fontScale_15px, cls.green, cls.fontThickness)
         return img
 
@@ -171,24 +168,22 @@ class PrototypeApp:
         y2 = nextBox[3]
         if x1 >= x2 or y1 >= y2:
             return True
-        # TODO: compare nextBox pt1 and pt2 flows - should be similar
+
         # flow = nextBox - prevBox
 
-        # measure sides
-        # prevBoxWH = boxSizeWH(prevBox)
-        # nextBoxWH = boxSizeWH(nextBox)
-        # wRatio = prevBoxWH[0] / nextBoxWH[0]
-        # hRatio = prevBoxWH[1] / nextBoxWH[1]
-        # isNormalRatio = 1.15 > wRatio > .85 and 1.15 > hRatio > .85
-        # if not isNormalRatio:
-        #     return True
+        # measure sides of prev and next boxes
+        prevBoxWH = boxSizeWH(prevBox)
+        nextBoxWH = boxSizeWH(nextBox)
+        wRatio = prevBoxWH[0] / nextBoxWH[0]
+        hRatio = prevBoxWH[1] / nextBoxWH[1]
+        delta = .25
+        isNormalRatio = 1 + delta > wRatio > 1 - delta and 1 + delta > hRatio > 1 - delta
+        if not isNormalRatio:
+            return True
 
         return False
 
     def run(self):
-        detector = self.createDetector()
-        digitExtractor = ClusteringDigitsExtractor()
-
         def mouseCallback(event, x, y, flags, userdata):
             if event != cv2.EVENT_LBUTTONDOWN:
                 return
@@ -197,15 +192,20 @@ class PrototypeApp:
             stats = groupBy_count_desc(digitsOnPoint)
             print(stats)
 
+        framesPath = "../../images/smooth_frames/{}/*.jpg"
+
+        detector = self.createDetector()
+        digitExtractor = ClusteringDigitsExtractor()
+
         cv2.namedWindow("0")
         cv2.setMouseCallback("0", mouseCallback)
 
         prevDetections = []
         prevFrameGray = None
 
-        framesPath = "../../images/smooth_frames/4/*.jpg"
-        for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath):
-            # print(framePos)
+        framePathId = 3
+        for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
+            print("framePos", framePos)
             currentDetections = detector.detect(frameRgb).digitDetections
             trackedDetections = []
             if len(prevDetections) != 0:
@@ -225,7 +225,7 @@ class PrototypeApp:
                                     showAsCenters=False) == 'esc':
                 break
 
-        # self.saveDetections(prevDetections, "digit_detections_1.pcl")
+        self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
 
 
 PrototypeApp().run()
