@@ -79,6 +79,10 @@ class Draw:
         return img
 
 
+class FontRendering:
+    pass
+
+
 class Show:
     @staticmethod
     def digitDetections(frame, framePos,

@@ -16,7 +16,7 @@ class DarknetOpencvDetector:
         # Get the names of the output layers, i.e. the layers with unconnected outputs
         return [layersNames[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
-    def __init__(self, cfg_path, weights_path, input_size, conf_thres=.3, iou_thres=.4):
+    def __init__(self, cfg_path, weights_path, input_size, conf_thres=.5, iou_thres=.4):
         self.input_size = [input_size] * 2 if isinstance(input_size, int) else input_size
         self.conf_thres = conf_thres
         self.iou_thres = iou_thres

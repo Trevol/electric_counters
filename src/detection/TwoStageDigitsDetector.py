@@ -32,8 +32,9 @@ class TwoStageDigitsDetector:
         # assert len(screenDetections) <= 1, f"len(screenDetections)={len(screenDetections)}"
         if len(screenDetections) > 1:
             debugImg = rgb2bgr(rgbImage)
-            for scrDet in screenDetections:
-                x1, y1, x2, y2 = toInt_array(scrDet.box)
+            for srcDet in sorted(screenDetections, key=lambda d: d.box[0]):
+                print(srcDet.classScore)
+                x1, y1, x2, y2 = toInt_array(srcDet.box)
                 cv2.rectangle(debugImg, (x1, y1), (x2, y2), 255, 1)
             imshowWait(DEBUG=debugImg, waitForKeys=27)
             assert len(screenDetections) <= 1, f"len(screenDetections)={len(screenDetections)}"
