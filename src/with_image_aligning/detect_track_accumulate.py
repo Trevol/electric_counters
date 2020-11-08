@@ -8,32 +8,21 @@ import numpy as np
 from trvo_utils import toInt_array
 from trvo_utils.box_utils import pointInBox, boxCenter, boxSizeWH
 from trvo_utils.cv2gui_utils import imshowWait
-from trvo_utils.imutils import bgr2rgb, imgByBox
+from trvo_utils.imutils import bgr2rgb
 from trvo_utils.optFlow_trackers import RectTracker
-from trvo_utils.timer import timeit
 from trvo_utils.viz_utils import make_bgr_colors
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
-from detection.TwoStageDigitsDetectionResult import TwoStageDigitsDetectionResult, DigitDetection
-from detection.TwoStageDigitsDetector import TwoStageDigitsDetector, remapBox
+from detection.TwoStageDigitsDetectionResult import DigitDetection
+from detection.TwoStageDigitsDetector import TwoStageDigitsDetector
 from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor, DigitAtPoint
+from with_image_aligning.digit_renderer import DigitRenderer
 from with_image_aligning.frame_reader import FrameReader
-
-
-def getFontScale(text, fontFace, desiredHeight, thickness):
-    fontScale = 20
-    (w, h), _ = cv2.getTextSize(text, fontFace, fontScale, thickness)
-    return fontScale * desiredHeight / h
 
 
 class Draw:
     numOfDigits = 10
     colors = make_bgr_colors(numOfDigits)
-    fontFace = cv2.FONT_HERSHEY_SIMPLEX
-    fontThickness = 1
-    fontScale_15px = getFontScale("1", fontFace, 15, fontThickness)
-    (fontWH_15px), _ = cv2.getTextSize("1", fontFace, fontScale_15px, fontThickness)
-    fontWH_15px = np.float32(fontWH_15px)
 
     @staticmethod
     def rectangle(img, box, color, thickness=1):
@@ -64,23 +53,15 @@ class Draw:
             cv2.circle(img, center, 1, (0, 255, 0), -1)
         return img
 
-    green = 0, 255, 0
+    digitRenderer = DigitRenderer(15)
 
     @classmethod
     def digitsAtPoints(cls, img, digitsAtPoints: List[DigitAtPoint]):
         if len(digitsAtPoints) == 0:
             return None
         for digitAtPoint in digitsAtPoints:
-            digitTxt = str(digitAtPoint.digit)
-            # TODO: precalculate or move to separate class
-            textPt = digitAtPoint.point + (cls.fontWH_15px / 2) * [-1, 1]
-            textPt = tuple(np.int32(textPt))
-            cv2.putText(img, digitTxt, textPt, cls.fontFace, cls.fontScale_15px, cls.green, cls.fontThickness)
+            cls.digitRenderer.render(img, digitAtPoint.digit, digitAtPoint.point)
         return img
-
-
-class FontRendering:
-    pass
 
 
 class Show:
