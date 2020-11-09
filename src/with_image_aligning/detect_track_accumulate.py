@@ -53,7 +53,7 @@ class Draw:
             cv2.circle(img, center, 1, (0, 255, 0), -1)
         return img
 
-    digitRenderer = DigitRenderer(15)
+    digitRenderer = DigitRenderer(15, fontThickness=2)
 
     @classmethod
     def digitsAtPoints(cls, img, digitsAtPoints: List[DigitAtPoint]):
@@ -188,7 +188,7 @@ class PrototypeApp:
         prevDetections = []
         prevFrameGray = None
 
-        framePathId = 3
+        framePathId = 1
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
             print("framePos", framePos)
             currentDetections = detector.detect(frameRgb).digitDetections
@@ -207,7 +207,7 @@ class PrototypeApp:
             #     break
 
             if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
-                                    showAsCenters=False) == 'esc':
+                                    showAsCenters=True) == 'esc':
                 break
 
         self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")

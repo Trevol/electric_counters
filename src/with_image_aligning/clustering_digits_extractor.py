@@ -18,7 +18,7 @@ class DigitAtPoint:
 
 class ClusteringDigitsExtractor:
     def __init__(self):
-        self.clusterer = hdbscan.HDBSCAN(metric="l2", cluster_selection_epsilon=5, cluster_selection_method='eom')
+        self.clusterer = hdbscan.HDBSCAN(metric="l2", cluster_selection_epsilon=10, cluster_selection_method='eom')
 
     @staticmethod
     def _cluster(cluster_obj):
@@ -32,8 +32,9 @@ class ClusteringDigitsExtractor:
         self.clusterer.fit(centers)  # cluster by box centers
 
         # filter outliers (noise, cluster = -1) and sort for grouping
+        clusters_detections_probs = zip(self.clusterer.labels_, detections, self.clusterer.probabilities_)
         sorted_denoised_clusters_detections_probs = sorted(
-            (o for o in zip(self.clusterer.labels_, detections, self.clusterer.probabilities_)
+            (o for o in clusters_detections_probs
              if self._cluster(o) != -1),
             key=self._cluster)
 
@@ -42,7 +43,7 @@ class ClusteringDigitsExtractor:
             digit_count = np.zeros(10, np.int32)  # index is digit, value is count
             center, center_probability = None, 0
             for _, detection, prob in detectionsCluster:
-                if prob > center_probability:
+                if prob > center_probability:  # track point with max probability. It will be used as cluster center
                     center = boxCenter(detection.boxInImage)
                     center_probability = prob
                 digit_count[detection.digit] += 1
