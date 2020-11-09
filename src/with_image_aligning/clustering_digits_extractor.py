@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from itertools import groupby
 from operator import itemgetter
-from typing import List
+from typing import List, Iterable, Tuple
 
 import hdbscan
 import numpy as np
@@ -28,37 +28,32 @@ class ClusteringDigitsExtractor:
     def extract(self, detections: List[DigitDetection], numOfObservations) -> List[DigitAtPoint]:
         if len(detections) < 3:
             return list()
-        # cluster by box centers
-        centers = [boxCenter(d.boxInImage) for d in detections]
-        centers = np.float32(centers)
+        centers = np.float32([boxCenter(d.boxInImage) for d in detections])
+        self.clusterer.fit(centers)  # cluster by box centers
 
-        self.clusterer.fit(centers)
-
-        clusters = self.clusterer.labels_
-        probs = self.clusterer.probabilities_
-
-        digitsAtPoints = list()
-        clusteredDetections = sorted(
-            (o for o in zip(clusters, detections, probs) if self._cluster(o) != -1),
+        # filter outliers (noise, cluster = -1) and sort for grouping
+        sorted_denoised_clusters_detections_probs = sorted(
+            (o for o in zip(self.clusterer.labels_, detections, self.clusterer.probabilities_)
+             if self._cluster(o) != -1),
             key=self._cluster)
-        for cluster, detectionsGroup in groupby(clusteredDetections, key=self._cluster):
+
+        def computeDigitAtClusterCenter(detectionsCluster: Iterable[Tuple[int, DigitDetection, float]]) -> DigitAtPoint:
             # count detection for each digit, find cluster "center"
-            digit_count = {}
+            digit_count = np.zeros(10, np.int32)  # index is digit, value is count
             center, center_probability = None, 0
-            detection: DigitDetection
-            for _, detection, prob in detectionsGroup:
+            for _, detection, prob in detectionsCluster:
                 if prob > center_probability:
                     center = boxCenter(detection.boxInImage)
                     center_probability = prob
-                digit = detection.digit
-                digit_count[digit] = digit_count.get(digit, 0) + 1
-                # TODO: can we track digit with max count here???
+                digit_count[detection.digit] += 1
 
-            assert center is not None
-            assert len(digit_count) > 0
+            digit = digit_count.argmax()  # index with max count
+            return DigitAtPoint(digit, center)
 
-            digit = max(digit_count.items(), key=itemgetter(1))[0]
-            digitsAtPoints.append(DigitAtPoint(digit, center))
+        digitsAtPoints = [
+            computeDigitAtClusterCenter(detectionsCluster) for _, detectionsCluster in
+            groupby(sorted_denoised_clusters_detections_probs, key=self._cluster)
+        ]
 
         # sort by point.x
         digitsAtPoints.sort(key=lambda d: d.point[0])
