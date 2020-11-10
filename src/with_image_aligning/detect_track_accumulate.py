@@ -188,9 +188,9 @@ class PrototypeApp:
         prevDetections = []
         prevFrameGray = None
 
-        framePathId = 1
+        framePathId = 2
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
-            print("framePos", framePos)
+            # print("framePos", framePos)
             currentDetections = detector.detect(frameRgb).digitDetections
             trackedDetections = []
             if len(prevDetections) != 0:
