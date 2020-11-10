@@ -9,7 +9,7 @@ import os
 from trvo_utils.imutils import imHW
 
 from experiments.with_dataset.load_images_and_labels_2 import LoadImagesAndLabels2
-from utils.utils import xywh2xyxy
+from utils.utils import xywh2xyxy, plot_images
 
 
 def image2label(img):
@@ -33,10 +33,10 @@ def main():
            'hsv_h': 0.0138 * 1.3,  # image HSV-Hue augmentation (fraction)
            'hsv_s': 0.678 * 1.3,  # image HSV-Saturation augmentation (fraction)
            'hsv_v': 0.36 * 1.3,  # image HSV-Value augmentation (fraction)
-           'degrees': 1.98 * 0,  # image rotation (+/- deg)
-           'translate': 0.05 * 0,  # image translation (+/- fraction)
-           'scale': 0.05 * 0,  # image scale (+/- gain) 7
-           'shear': 0.641 * 0,  # image shear (+/- deg)
+           'degrees': 1.98 * 2,  # image rotation (+/- deg)
+           'translate': 0.05 * 2,  # image translation (+/- fraction)
+           'scale': 0.05 * 7,  # image scale (+/- gain) 7
+           'shear': 0.641 * 4,  # image shear (+/- deg)
            'lr_flip': False,
            'ud_flip': False
            }
@@ -45,23 +45,23 @@ def main():
                                    batch_size=16,
                                    augment=True,
                                    hyp=hyp,  # augmentation hyperparameters
-                                   rect=False,  # rectangular training
+                                   rect=True,  # rectangular training
                                    cache_images=False,
                                    single_cls=False,
                                    image2label=image2label)
 
     for i in range(len(dataset)):
-        item = dataset[i]
         imgTensor, labels, fName, shapes, src_img = dataset[i]
         # RGB to BGR, from 3xHxW to HxWx3
         imgBgr = imgTensor.numpy()[::-1].transpose(1, 2, 0).copy()
         imgH, imgW = imHW(imgBgr)
-        for _, label, x, y, w, h in labels:
-            x, y, w, h = toInt(x * imgW, y * imgH, w * imgW, h * imgH)
-            x2, y2 = x + w, y + h
-            cv2.rectangle(imgBgr, (x, y), (x2, y2), (0, 255, 0), 1)
+        for _, label, cx, cy, w, h in labels:
+            cx, cy, w, h = cx * imgW, cy * imgH, w * imgW, h * imgH
+            x1, y1 = cx - w / 2, cy - h / 2
+            x2, y2 = x1 + w, y1 + h
+            x1, y1, x2, y2 = toInt(x1, y1, x2, y2)
+            cv2.rectangle(imgBgr, (x1, y1), (x2, y2), (0, 255, 0), 1)
         displayImg = np.hstack([imgBgr, src_img])
-        print(labels)
         if imshowWait(displayImg) == 27:
             return
     waitKeys(27)

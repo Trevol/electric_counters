@@ -36,13 +36,13 @@ hyp = {'giou': 3.54,  # giou loss gain
        'momentum': 0.937,  # SGD momentum
        'weight_decay': 0.0005,  # optimizer weight decay
        'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
-       'hsv_h': 0.0138 * 1.3,  # image HSV-Hue augmentation (fraction)
-       'hsv_s': 0.678 * 1.3,  # image HSV-Saturation augmentation (fraction)
-       'hsv_v': 0.36 * 1.3,  # image HSV-Value augmentation (fraction)
-       'degrees': 1.98 * 2,  # image rotation (+/- deg)
-       'translate': 0.05 * 2,  # image translation (+/- fraction)
-       'scale': 0.05 * 7,  # image scale (+/- gain) 7
-       'shear': 0.641 * 4,  # image shear (+/- deg)
+       'hsv_h': 0.0138,  # image HSV-Hue augmentation (fraction)
+       'hsv_s': 0.678,  # image HSV-Saturation augmentation (fraction)
+       'hsv_v': 0.36,  # image HSV-Value augmentation (fraction)
+       'degrees': 1.98 * 0,  # image rotation (+/- deg)
+       'translate': 0.05 * 0,  # image translation (+/- fraction)
+       'scale': 0.05 * 0,  # image scale (+/- gain)
+       'shear': 0.641 * 0,  # image shear (+/- deg)
        'lr_flip': False,
        'ud_flip': False
        }
@@ -399,30 +399,59 @@ def train(hyp):
     return results
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--epochs', type=int, default=300)  # 500200 batches at bs 16, 117263 COCO images = 273 epochs
-    parser.add_argument('--batch-size', type=int, default=16)  # effective bs = batch_size * accumulate = 16 * 4 = 64
-    parser.add_argument('--cfg', type=str, default='cfg/yolov3-spp.cfg', help='*.cfg path')
-    parser.add_argument('--data', type=str, default='data/coco2017.data', help='*.data path')
-    parser.add_argument('--multi-scale', action='store_true', help='adjust (67%% - 150%%) img_size every 10 batches')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[320, 640], help='[min_train, max-train, test]')
-    parser.add_argument('--rect', action='store_true', help='rectangular training')
-    parser.add_argument('--resume', action='store_true', help='resume training from last.pt')
-    parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
-    parser.add_argument('--notest', action='store_true', help='only test final epoch')
-    parser.add_argument('--evolve', action='store_true', help='evolve hyperparameters')
-    parser.add_argument('--bucket', type=str, default='', help='gsutil bucket')
-    parser.add_argument('--cache-images', action='store_true', help='cache images for faster training')
-    parser.add_argument('--weights', type=str, default='weights/yolov3-spp-ultralytics.pt', help='initial weights path')
-    parser.add_argument('--name', default='', help='renames results.txt to results_name.txt if supplied')
-    parser.add_argument('--device', default='', help='device id (i.e. 0 or 0,1 or cpu)')
-    parser.add_argument('--adam', action='store_true', help='use adam optimizer')
-    parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')
-    parser.add_argument('--freeze-layers', action='store_true', help='Freeze non-output layers')
-    parser.add_argument('--input-size', type=int, default=416)
+class Opt:
+    epochs = 300
+    batch_size = 16
+    cfg = 'cfg/yolov3-spp.cfg'
+    data = 'data/coco2017.data'
+    multi_scale = False
+    img_size = [320, 640]
+    rect = True
+    resume = False
+    nosave = False
+    notest = False
+    evolve = False
+    bucket = ''
+    cache_images = False
+    weights = 'weights/yolov3-spp-ultralytics.pt'
+    name = ''
+    device = ''
+    adam = False
+    single_cls = False
+    freeze_layers = False
+    input_size = 416
 
-    opt = parser.parse_args()
+    def __repr__(self):
+        values = dict(
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            cfg=self.cfg,
+            data=self.data,
+            multi_scale=self.multi_scale,
+            img_size=self.img_size,
+            rect=self.rect,
+            resume=self.resume,
+            nosave=self.nosave,
+            notest=self.notest,
+            evolve=self.evolve,
+            bucket=self.bucket,
+            cache_images=self.cache_images,
+            weights=self.weights,
+            name=self.name,
+            device=self.device,
+            adam=self.adam,
+            single_cls=self.single_cls,
+            freeze_layers=self.freeze_layers,
+            input_size=self.input_size,
+        )
+        return str(values)
+
+
+if __name__ == '__main__':
+    opt = Opt()
+    print(opt)
+    sys.exit(0)
+
     opt.weights = last if opt.resume else opt.weights
     check_git_status()
     opt.cfg = check_file(opt.cfg)  # check file
