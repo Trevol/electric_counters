@@ -8,7 +8,7 @@ import os
 
 from trvo_utils.imutils import imHW
 
-from experiments.load_images_and_labels_2 import LoadImagesAndLabels2
+from experiments.with_dataset.load_images_and_labels_2 import LoadImagesAndLabels2
 from utils.utils import xywh2xyxy
 
 
@@ -45,7 +45,7 @@ def main():
                                    batch_size=16,
                                    augment=True,
                                    hyp=hyp,  # augmentation hyperparameters
-                                   rect=True,  # rectangular training
+                                   rect=False,  # rectangular training
                                    cache_images=False,
                                    single_cls=False,
                                    image2label=image2label)
