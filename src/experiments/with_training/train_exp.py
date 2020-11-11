@@ -449,9 +449,6 @@ class Opt:
 
 if __name__ == '__main__':
     opt = Opt()
-    print(opt)
-    sys.exit(0)
-
     opt.weights = last if opt.resume else opt.weights
     check_git_status()
     opt.cfg = check_file(opt.cfg)  # check file

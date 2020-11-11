@@ -2,9 +2,10 @@ from glob import glob
 
 import cv2
 from trvo_utils import toInt_array
-from trvo_utils.imutils import imreadRGB, imshowWait, rgb2bgr, bgr2rgb, fit_image_to_shape
+from trvo_utils.cv2gui_utils import imshowWait
+from trvo_utils.imutils import imreadRGB, rgb2bgr, bgr2rgb, fit_image_to_shape
 
-from DarknetPytorchDetector import DarknetPytorchDetector
+from detection.DarknetPytorchDetector import DarknetPytorchDetector
 from consts import BGRColors, FHD_SHAPE
 from utils_local.vis_utils import drawDetections, fitImageDetectionsToShape
 

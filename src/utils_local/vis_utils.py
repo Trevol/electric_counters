@@ -3,7 +3,8 @@ from typing import List
 import cv2
 import numpy as np
 from trvo_utils import toInt_array
-from trvo_utils.imutils import fit_image_to_shape, scaleBox
+from trvo_utils.box_utils import scaleBox
+from trvo_utils.imutils import fit_image_to_shape
 
 from consts import BGRColors
 from detection.ObjectDetectionResult import ObjectDetectionResult

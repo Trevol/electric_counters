@@ -2,6 +2,7 @@ from typing import List
 
 import cv2
 import numpy as np
+from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import imHW
 
 from detection.ObjectDetectionResult import ObjectDetectionResult
