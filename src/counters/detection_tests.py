@@ -23,13 +23,14 @@ def test_detect():
         # '/hdd/Datasets/counters/data/Musson_counters/*.jpg',
         # "/home/trevol/Repos/experiments_with_lightweight_detectors/electric_counters/images/smooth_frames/1/*.jpg",
         # "/home/trevol/Repos/experiments_with_lightweight_detectors/electric_counters/images/smooth_frames/2/*.jpg"
-        "/home/trevol/Repos/experiments_with_lightweight_detectors/electric_counters/images/smooth_frames/3/*.jpg",
+        # "/home/trevol/Repos/experiments_with_lightweight_detectors/electric_counters/images/smooth_frames/3/*.jpg",
         "/home/trevol/Repos/experiments_with_lightweight_detectors/electric_counters/images/smooth_frames/4/*.jpg"
     ]
 
     s = 320
     cfg_path = f'data/yolov3-tiny-2cls-{s}.cfg'
-    weights_path = f'best_weights/yolov3-tiny-2cls/{s}/2/best_.weights'
+    # weights_path = f'best_weights/yolov3-tiny-2cls/{s}/1/yolov3-tiny-2cls-320.weights'
+    weights_path = f'best_weights/yolov3-tiny-2cls/{s}/2/best___.weights'
     # detector = DarknetPytorchDetector(
     #     cfg_path=cfg_path,
     #     weights_path=weights_path,
@@ -42,7 +43,7 @@ def test_detect():
         cfg_path=cfg_path,
         weights_path=weights_path,
         input_size=s,
-        conf_thres=.5,
+        conf_thres=.3,
         iou_thres=.4
     )
 
@@ -52,7 +53,7 @@ def test_detect():
             detections = detector.detect(bgr2rgb(img))
 
             img, detections, _ = fitImageDetectionsToShape(img, detections, FHD_SHAPE)
-            drawDetections(img, detections, BGRColors.green)
+            drawDetections(img, detections, BGRColors.green, withScores=True)
 
             k = imshowWait([img, image_file])
             if k == 27:
@@ -63,6 +64,6 @@ def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
     cfg_file = 'data/yolov3-tiny-2cls-320.cfg'
-    weights_file = 'best_weights/yolov3-tiny-2cls/320/2/best__.pt'
+    weights_file = 'best_weights/yolov3-tiny-2cls/320/2/best___.pt'
 
     convert(cfg_file, weights_file)
