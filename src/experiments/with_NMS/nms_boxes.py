@@ -3,7 +3,7 @@ import numpy as np
 from trvo_utils.timer import timeit
 
 
-def main():
+def main__():
     n = 2000
     print(n)
     boxes = [
@@ -23,6 +23,12 @@ def main():
         with timeit():
             indices = cv2.dnn.NMSBoxes(boxes, scores, .7, .7)
 
+
+def main():
+    boxes = [
+        np.float32([755.85, 371.64, 768.33, 382.43]),
+        np.float32([756.24, 366.37, 767.62, 373.86])
+    ]
 
 
 main()

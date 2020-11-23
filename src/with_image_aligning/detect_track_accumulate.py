@@ -175,7 +175,8 @@ class PrototypeApp:
             pt = x, y
             digitsOnPoint = [d.digit for d in prevDetections if pointInBox(d.boxInImage, pt)]
             stats = groupBy_count_desc(digitsOnPoint)
-            print(stats)
+            boxes = [b for b in nmsedBoxes if pointInBox(b, pt)]
+            print(boxes, stats)
 
         framesPath = "../../images/smooth_frames/{}/*.jpg"
 
@@ -185,8 +186,10 @@ class PrototypeApp:
         cv2.namedWindow("0")
         cv2.setMouseCallback("0", mouseCallback)
 
-        prevDetections = []
+        prevDetections: List[DigitDetection] = []
         prevFrameGray = None
+
+        nmsedBoxes = []
 
         framePathId = 2
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
@@ -198,18 +201,64 @@ class PrototypeApp:
             prevDetections = trackedDetections + currentDetections
             prevFrameGray = frameGray
 
-            digitsAtPoints = digitExtractor.extract(prevDetections, -1)
-
             # centers = digitExtractor.extractCenters_(prevDetections)
             # print(framePos, len(centers))
             # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
             #     break
 
-            if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
-                                    showAsCenters=True) == 'esc':
+            nmsedBoxes = self.nmsDetectionBoxes(prevDetections)
+            # find intersected
+            if self.show_resultingBoxes_detections(frameBgr, framePos, nmsedBoxes, prevDetections) == 'esc':
                 break
 
-        self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
+            # digitsAtPoints = digitExtractor.extract(prevDetections, -1)
+            # if Show.digitDetections(frameB gr, framePos, prevDetections, digitsAtPoints,
+            #                         showAsCenters=False) == 'esc':
+            #     break
+
+        # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
+
+    def nmsDetectionBoxes(self, detections: List[DigitDetection]) -> List[np.ndarray]:
+        if len(detections) == 0:
+            return []
+        xywhBoxes = [to_xywh(d.boxInImage) for d in detections]
+        scores = [.99 for d in detections]
+        indices = cv2.dnn.NMSBoxes(xywhBoxes, scores, .8, .04)
+        indices = indices.reshape(-1)  # [[0], [1], [2]] to [0, 1, 2]
+        nmsedBoxes = [detections[i].boxInImage for i in indices]
+        return nmsedBoxes
+
+    def show_resultingBoxes_detections(
+            self,
+            img,
+            imgPos,
+            boxes: List[np.ndarray],
+            detections: List[DigitDetection]):
+        green = 0, 255, 0
+        imgWithResultingBoxes = img.copy()
+        for box in boxes:
+            Draw.rectangle(imgWithResultingBoxes, box, green)
+
+        Draw.digitDetections(img, detections, showAsCenters=False)
+
+        key = imshowWait((imgWithResultingBoxes, imgPos), (img, imgPos))
+        if key == 27:
+            return 'esc'
+
+
+def to_xywh(xyxy):
+    x1 = xyxy[0]
+    y1 = xyxy[1]
+    x2 = xyxy[2]
+    y2 = xyxy[3]
+    w = x2 - x1
+    h = y2 - y1
+    xywh = np.empty_like(xyxy)
+    xywh[0] = x1
+    xywh[1] = y1
+    xywh[2] = w
+    xywh[3] = h
+    return xywh
 
 
 PrototypeApp().run()
