@@ -8,6 +8,7 @@ from trvo_utils.box_utils import expandBox
 from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import imgByBox, rgb2bgr
 from trvo_utils.iter_utils import firstOrDefault
+from trvo_utils.timer import timeit
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.ObjectDetectionResult import ObjectDetectionResult
@@ -29,15 +30,7 @@ class TwoStageDigitsDetector:
         # TODO: если больше 2 обнаружений - выбирать те, которые ближе к центру изображения
         # assert len(counterDetections) <= 1, f"len(counterDetections)={len(counterDetections)}"
 
-        # assert len(screenDetections) <= 1, f"len(screenDetections)={len(screenDetections)}"
-        if len(screenDetections) > 1:
-            debugImg = rgb2bgr(rgbImage)
-            for srcDet in sorted(screenDetections, key=lambda d: d.box[0]):
-                print(srcDet.classScore)
-                x1, y1, x2, y2 = toInt_array(srcDet.box)
-                cv2.rectangle(debugImg, (x1, y1), (x2, y2), 255, 1)
-            imshowWait(DEBUG=debugImg, waitForKeys=27)
-            assert len(screenDetections) <= 1, f"len(screenDetections)={len(screenDetections)}"
+        assert len(screenDetections) <= 1, f"len(screenDetections)={len(screenDetections)}"
 
         # extract counter and screen
         return firstOrDefault(counterDetections), firstOrDefault(screenDetections)

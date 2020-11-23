@@ -6,10 +6,11 @@ import cv2
 import numpy as np
 
 from trvo_utils import toInt_array
-from trvo_utils.box_utils import pointInBox, boxCenter, boxSizeWH
+from trvo_utils.box_utils import pointInBox, boxCenter, boxSizeWH, xyxy2xywh
 from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import bgr2rgb
 from trvo_utils.optFlow_trackers import RectTracker
+from trvo_utils.timer import timeit
 from trvo_utils.viz_utils import make_bgr_colors
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
@@ -80,6 +81,23 @@ class Show:
     def clustersCenters(frame, framePos, centers):
         vis = Draw.clustersCenters(frame.copy(), centers)
         key = imshowWait([vis, framePos], frame)
+        if key == 27:
+            return 'esc'
+
+    @staticmethod
+    def nmsBoxes_detections(
+            img,
+            imgPos,
+            boxes: List[np.ndarray],
+            detections: List[DigitDetection]):
+        green = 0, 255, 0
+        imgWithResultingBoxes = img.copy()
+        for box in boxes:
+            Draw.rectangle(imgWithResultingBoxes, box, green)
+
+        Draw.digitDetections(img, detections, showAsCenters=False)
+
+        key = imshowWait((imgWithResultingBoxes, imgPos), (img, imgPos))
         if key == 27:
             return 'esc'
 
@@ -175,7 +193,7 @@ class PrototypeApp:
             pt = x, y
             digitsOnPoint = [d.digit for d in prevDetections if pointInBox(d.boxInImage, pt)]
             stats = groupBy_count_desc(digitsOnPoint)
-            boxes = [b for b in nmsedBoxes if pointInBox(b, pt)]
+            boxes = [b for b in nmsBoxes if pointInBox(b, pt)]
             print(boxes, stats)
 
         framesPath = "../../images/smooth_frames/{}/*.jpg"
@@ -189,10 +207,12 @@ class PrototypeApp:
         prevDetections: List[DigitDetection] = []
         prevFrameGray = None
 
-        nmsedBoxes = []
+        nmsBoxes = []
 
-        framePathId = 2
+        framePathId = 3
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
+            if framePos % 20 == 0:
+                print("framePos", framePos)
             currentDetections = detector.detect(frameRgb).digitDetections
             trackedDetections = []
             if len(prevDetections) != 0:
@@ -206,59 +226,28 @@ class PrototypeApp:
             # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
             #     break
 
-            nmsedBoxes = self.nmsDetectionBoxes(prevDetections)
-            # find intersected
-            if self.show_resultingBoxes_detections(frameBgr, framePos, nmsedBoxes, prevDetections) == 'esc':
+            nmsBoxes = self.nmsDetectionBoxes(prevDetections)
+
+            if Show.nmsBoxes_detections(frameBgr, framePos, nmsBoxes, prevDetections) == 'esc':
                 break
 
             # digitsAtPoints = digitExtractor.extract(prevDetections, -1)
             # if Show.digitDetections(frameB gr, framePos, prevDetections, digitsAtPoints,
             #                         showAsCenters=False) == 'esc':
             #     break
-
+        print("framePos", framePos)
         # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
 
-    def nmsDetectionBoxes(self, detections: List[DigitDetection]) -> List[np.ndarray]:
+    @staticmethod
+    def nmsDetectionBoxes(detections: List[DigitDetection]) -> List[np.ndarray]:
         if len(detections) == 0:
             return []
-        xywhBoxes = [to_xywh(d.boxInImage) for d in detections]
-        scores = [.99 for d in detections]
-        indices = cv2.dnn.NMSBoxes(xywhBoxes, scores, .8, .04)
+        xywhBoxes = [xyxy2xywh(d.boxInImage) for d in detections]
+        scores = [d.score for d in detections]
+        indices = cv2.dnn.NMSBoxes(xywhBoxes, scores, .5, .04)
         indices = indices.reshape(-1)  # [[0], [1], [2]] to [0, 1, 2]
         nmsedBoxes = [detections[i].boxInImage for i in indices]
         return nmsedBoxes
-
-    def show_resultingBoxes_detections(
-            self,
-            img,
-            imgPos,
-            boxes: List[np.ndarray],
-            detections: List[DigitDetection]):
-        green = 0, 255, 0
-        imgWithResultingBoxes = img.copy()
-        for box in boxes:
-            Draw.rectangle(imgWithResultingBoxes, box, green)
-
-        Draw.digitDetections(img, detections, showAsCenters=False)
-
-        key = imshowWait((imgWithResultingBoxes, imgPos), (img, imgPos))
-        if key == 27:
-            return 'esc'
-
-
-def to_xywh(xyxy):
-    x1 = xyxy[0]
-    y1 = xyxy[1]
-    x2 = xyxy[2]
-    y2 = xyxy[3]
-    w = x2 - x1
-    h = y2 - y1
-    xywh = np.empty_like(xyxy)
-    xywh[0] = x1
-    xywh[1] = y1
-    xywh[2] = w
-    xywh[3] = h
-    return xywh
 
 
 PrototypeApp().run()
