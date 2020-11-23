@@ -110,7 +110,7 @@ class PrototypeApp:
     @staticmethod
     def createDetector():
         cfg_file = '../counters/data/yolov3-tiny-2cls-320.cfg'
-        weights_file = '../counters/best_weights/yolov3-tiny-2cls/320/yolov3-tiny-2cls-320.weights'
+        weights_file = '../counters/best_weights/yolov3-tiny-2cls/320/1/yolov3-tiny-2cls-320.weights'
         screenDetector = DarknetOpencvDetector(cfg_file, weights_file, 320)
 
         # cfg_file = '../counter_digits/data/yolov3-tiny-10cls-320.cfg'
@@ -190,7 +190,6 @@ class PrototypeApp:
 
         framePathId = 2
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
-            # print("framePos", framePos)
             currentDetections = detector.detect(frameRgb).digitDetections
             trackedDetections = []
             if len(prevDetections) != 0:
