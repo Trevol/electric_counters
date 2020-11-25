@@ -40,7 +40,7 @@ def getSortedScoreIndex(scores):
     return sorted(score_index, reverse=True)
 
 
-def NMSBoxes_3_noScore(boxes, overlap_threshold):
+def groupBoxes_noScore(boxes, overlap_threshold):
     boxes = [Rect(b) for b in boxes]
     indices = []
     keptIndices = []
@@ -128,7 +128,7 @@ def groupBoxes(boxes, scores, overlap_threshold):
 
 
 if __name__ == '__main__':
-    def run():
+    def runTest():
         boxes = [
             (1, 0, 15, 15),
             (1, 1, 15, 15),
@@ -141,7 +141,7 @@ if __name__ == '__main__':
             .8, .9, .99, .6, .8
         ]
 
-        indices, keptIndices = NMSBoxes_3_noScore(boxes, .7)
+        indices, keptIndices = groupBoxes_noScore(boxes, .7)
         assert (indices == [0, 0, 0, 0, 4])
         assert (keptIndices == [0, 4])
 
@@ -150,4 +150,34 @@ if __name__ == '__main__':
         assert (keptIndices == [2, 4])
 
 
-    run()
+    def runBenchmark():
+        boxes = [
+            (1, 0, 15, 15),
+            (1, 1, 15, 15),
+            (0, 0, 15, 15),
+            (0, 1, 15, 15),
+
+            (20, 20, 10, 10)
+        ]
+        scores = [
+            .8, .9, .99, .6, .8
+        ]
+
+        k = 1000
+        boxes = boxes * k
+        scores = scores * k
+
+        n = 5
+        for _ in range(n):
+            with timeit():
+                indices, keptIndices = groupBoxes_noScore(boxes, .7)
+
+        print("-------------------------")
+
+        for _ in range(n):
+            with timeit():
+                indices, keptIndices = groupBoxes(boxes, scores, .7)
+
+
+    runTest()
+    runBenchmark()
