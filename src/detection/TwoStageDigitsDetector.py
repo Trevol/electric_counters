@@ -59,7 +59,7 @@ class TwoStageDigitsDetector:
             DigitDetection(
                 digit=d.classId,
                 score=d.classScore,
-                boxInImage=remapBox(d.box, adjustedScreenBox)
+                xyxyBoxInImage=remapBox(d.box, adjustedScreenBox)
             )
             for d in digitsDetections
         ]

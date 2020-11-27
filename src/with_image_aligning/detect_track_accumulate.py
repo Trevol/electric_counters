@@ -16,7 +16,9 @@ from trvo_utils.viz_utils import make_bgr_colors
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.TwoStageDigitsDetectionResult import DigitDetection
 from detection.TwoStageDigitsDetector import TwoStageDigitsDetector
-from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor, DigitAtPoint
+from with_image_aligning.digits_extractors.box_grouping_digit_extractor import BoxGroupingDigitExtractor
+from with_image_aligning.digits_extractors.clustering_digits_extractor import ClusteringDigitsExtractor
+from with_image_aligning.digits_extractors.digit_at_point import DigitAtPoint
 from with_image_aligning.digit_renderer import DigitRenderer
 from with_image_aligning.frame_reader import FrameReader
 
@@ -31,8 +33,8 @@ class Draw:
         return cv2.rectangle(img, (x1, y1), (x2, y2), color, thickness)
 
     @staticmethod
-    def rectangleCenter(img, box, color, radius=1, thickness=-1):
-        center = tuple(toInt_array(boxCenter(box)))
+    def rectangleCenter(img, xyxyBox, color, radius=1, thickness=-1):
+        center = tuple(toInt_array(boxCenter(xyxyBox)))
         return cv2.circle(img, center, radius, color, thickness)
 
     @classmethod
@@ -42,9 +44,9 @@ class Draw:
         for d in detections:
             digitColor = cls.colors[d.digit]
             if showAsCenters:
-                cls.rectangleCenter(img, d.boxInImage, digitColor)
+                cls.rectangleCenter(img, d.xyxyBoxInImage, digitColor)
             else:
-                cls.rectangle(img, d.boxInImage, digitColor)
+                cls.rectangle(img, d.xyxyBoxInImage, digitColor)
         return img
 
     @staticmethod
@@ -153,12 +155,12 @@ class PrototypeApp:
 
     def trackDigitDetections(self, prevFrameGray, nextFrameGray,
                              prevDetections: List[DigitDetection]) -> List[DigitDetection]:
-        prevBoxes = [d.boxInImage for d in prevDetections]
+        prevBoxes = [d.xyxyBoxInImage for d in prevDetections]
         boxes, status = self.rectTracker.track(prevFrameGray, nextFrameGray, prevBoxes)
 
         nextDetections = []
         for prevDetection, box, boxStatus in zip(prevDetections, boxes, status):
-            if not boxStatus or self.isAbnormalTrack(prevDetection.boxInImage, box):
+            if not boxStatus or self.isAbnormalTrack(prevDetection.xyxyBoxInImage, box):
                 continue
             nextDetections.append(DigitDetection(prevDetection.digit, prevDetection.score, box))
         return nextDetections
@@ -191,7 +193,7 @@ class PrototypeApp:
             if event != cv2.EVENT_LBUTTONDOWN:
                 return
             pt = x, y
-            digitsOnPoint = [d.digit for d in prevDetections if pointInBox(d.boxInImage, pt)]
+            digitsOnPoint = [d.digit for d in prevDetections if pointInBox(d.xyxyBoxInImage, pt)]
             stats = groupBy_count_desc(digitsOnPoint)
             boxes = [b for b in nmsBoxes if pointInBox(b, pt)]
             print(boxes, stats)
@@ -199,8 +201,8 @@ class PrototypeApp:
         framesPath = "../../images/smooth_frames/{}/*.jpg"
 
         detector = self.createDetector()
-        digitExtractor = ClusteringDigitsExtractor()
-
+        # digitExtractor = ClusteringDigitsExtractor()
+        digitExtractor = BoxGroupingDigitExtractor()
         cv2.namedWindow("0")
         cv2.setMouseCallback("0", mouseCallback)
 
@@ -209,7 +211,7 @@ class PrototypeApp:
 
         nmsBoxes = []
 
-        framePathId = 3
+        framePathId = 4
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
             if framePos % 20 == 0:
                 print("framePos", framePos)
@@ -226,27 +228,22 @@ class PrototypeApp:
             # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
             #     break
 
-            nmsBoxes = self.nmsDetectionBoxes(prevDetections)
-
-            if Show.nmsBoxes_detections(frameBgr, framePos, nmsBoxes, prevDetections) == 'esc':
-                break
-
             # digitsAtPoints = digitExtractor.extract(prevDetections, -1)
-            # if Show.digitDetections(frameB gr, framePos, prevDetections, digitsAtPoints,
+            # if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
             #                         showAsCenters=False) == 'esc':
             #     break
         print("framePos", framePos)
-        # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
+        self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
 
     @staticmethod
     def nmsDetectionBoxes(detections: List[DigitDetection]) -> List[np.ndarray]:
         if len(detections) == 0:
             return []
-        xywhBoxes = [xyxy2xywh(d.boxInImage) for d in detections]
+        xywhBoxes = [xyxy2xywh(d.xyxyBoxInImage) for d in detections]
         scores = [d.score for d in detections]
         indices = cv2.dnn.NMSBoxes(xywhBoxes, scores, .5, .04)
         indices = indices.reshape(-1)  # [[0], [1], [2]] to [0, 1, 2]
-        nmsedBoxes = [detections[i].boxInImage for i in indices]
+        nmsedBoxes = [detections[i].xyxyBoxInImage for i in indices]
         return nmsedBoxes
 
 

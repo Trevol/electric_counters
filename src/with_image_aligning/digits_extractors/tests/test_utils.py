@@ -4,12 +4,12 @@ import cv2
 import numpy as np
 from trvo_utils.cv2gui_utils import imshowWait
 
-from with_image_aligning.clustering_digits_extractor import ClusteringDigitsExtractor, DigitAtPoint
+from with_image_aligning.digits_extractors.digit_at_point import DigitAtPoint
 
 
-def loadDetections():
+def loadDetections(id):
     from pickle import load
-    with open("digit_detections_1.pcl", "rb") as f:
+    with open(f"digit_detections_{id}.pcl", "rb") as f:
         numOfObservations = 386
         return load(f), numOfObservations
 
@@ -18,7 +18,6 @@ def getFontScale(text, fontFace, desiredHeight, thickness):
     fontScale = 20
     (w, h), _ = cv2.getTextSize(text, fontFace, fontScale, thickness)
     return fontScale * desiredHeight / h
-
 
 
 def showDigits(digitsAtPoints: List[DigitAtPoint]):
@@ -37,14 +36,3 @@ def showDigits(digitsAtPoints: List[DigitAtPoint]):
         textPt = tuple(np.int32(digitAtPoint.point))
         cv2.putText(img, digitStr, textPt, fontFace, fontScale, 255, fontThickness)
     imshowWait(img)
-
-
-def main():
-    detections, numOfObservations = loadDetections()
-    extractor = ClusteringDigitsExtractor()
-    digitsAtPoints = extractor.extract(detections, numOfObservations)
-
-    showDigits(digitsAtPoints)
-
-
-main()

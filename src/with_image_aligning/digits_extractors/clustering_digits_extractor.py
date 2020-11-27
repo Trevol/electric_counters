@@ -1,6 +1,4 @@
-from dataclasses import dataclass
 from itertools import groupby
-from operator import itemgetter
 from typing import List, Iterable, Tuple
 
 import hdbscan
@@ -8,12 +6,7 @@ import numpy as np
 from trvo_utils.box_utils import boxCenter
 
 from detection.TwoStageDigitsDetectionResult import DigitDetection
-
-
-@dataclass
-class DigitAtPoint:
-    digit: int
-    point: np.ndarray
+from with_image_aligning.digits_extractors.digit_at_point import DigitAtPoint
 
 
 class ClusteringDigitsExtractor:
@@ -28,7 +21,7 @@ class ClusteringDigitsExtractor:
     def extract(self, detections: List[DigitDetection], numOfObservations) -> List[DigitAtPoint]:
         if len(detections) < 3:
             return list()
-        centers = np.float32([boxCenter(d.boxInImage) for d in detections])
+        centers = np.float32([boxCenter(d.xyxyBoxInImage) for d in detections])
         self.clusterer.fit(centers)  # cluster by box centers
 
         # filter outliers (noise, cluster = -1) and sort for grouping
@@ -44,12 +37,12 @@ class ClusteringDigitsExtractor:
             center, center_probability = None, 0
             for _, detection, prob in detectionsCluster:
                 if prob > center_probability:  # track point with max probability. It will be used as cluster center
-                    center = boxCenter(detection.boxInImage)
+                    center = boxCenter(detection.xyxyBoxInImage)
                     center_probability = prob
                 digit_count[detection.digit] += 1
 
             digit = digit_count.argmax()  # index with max count
-            return DigitAtPoint(digit, center)
+            return DigitAtPoint(digit, center, None)
 
         digitsAtPoints = [
             computeDigitAtClusterCenter(detectionsCluster) for _, detectionsCluster in
@@ -65,7 +58,7 @@ class ClusteringDigitsExtractor:
 
     def extractCenters_(self, detections: List[DigitDetection]) -> List[DigitAtPoint]:
         # cluster by box centers
-        centers = [boxCenter(d.boxInImage) for d in detections]
+        centers = [boxCenter(d.xyxyBoxInImage) for d in detections]
         centers = np.float32(centers)
         self.clusterer.fit(centers)
 

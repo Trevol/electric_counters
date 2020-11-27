@@ -2,13 +2,23 @@ from dataclasses import dataclass, field
 from typing import List
 
 import numpy as np
+from trvo_utils.box_utils import xyxy2xywh
+
+from with_image_aligning.digits_extractors.rect import Rect
 
 
 @dataclass
 class DigitDetection:
     digit: int
     score: float
-    boxInImage: np.ndarray
+    xyxyBoxInImage: np.ndarray
+    # redudancy for speedup box grouping
+    xywhBoxInImage: List = None
+    boxInImage: Rect = None
+
+    def __post_init__(self):
+        self.xywhBoxInImage = xyxy2xywh(self.xyxyBoxInImage).tolist()
+        self.boxInImage = Rect(self.xywhBoxInImage)
 
 
 @dataclass
