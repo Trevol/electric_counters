@@ -215,6 +215,7 @@ class PrototypeApp:
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
             if framePos % 20 == 0:
                 print("framePos", framePos)
+
             currentDetections = detector.detect(frameRgb).digitDetections
             trackedDetections = []
             if len(prevDetections) != 0:
@@ -228,12 +229,12 @@ class PrototypeApp:
             # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
             #     break
 
-            # digitsAtPoints = digitExtractor.extract(prevDetections, -1)
-            # if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
-            #                         showAsCenters=False) == 'esc':
-            #     break
+            digitsAtPoints = digitExtractor.extract(prevDetections, -1)
+            if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
+                                    showAsCenters=False) == 'esc':
+                break
         print("framePos", framePos)
-        self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
+        # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
 
     @staticmethod
     def nmsDetectionBoxes(detections: List[DigitDetection]) -> List[np.ndarray]:
