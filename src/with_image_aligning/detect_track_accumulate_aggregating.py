@@ -13,6 +13,8 @@ from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.TwoStageDigitsDetectionResult import DigitDetection
 from detection.TwoStageDigitsDetector import TwoStageDigitsDetector
 from with_image_aligning.boxed_object_tracker import BoxedObjectTracker
+from with_image_aligning.digits_extractors.aggregating_box_grouping_digit_extractor import \
+    AggregatingBoxGroupingDigitExtractor
 from with_image_aligning.digits_extractors.box_grouping_digit_extractor import BoxGroupingDigitExtractor
 from with_image_aligning.digits_extractors.digit_at_point import DigitAtPoint
 from with_image_aligning.digit_renderer import DigitRenderer
@@ -144,7 +146,7 @@ class PrototypeApp:
         detector = self.createDetector()
 
         # digitExtractor = ClusteringDigitsExtractor()
-        digitExtractor = BoxGroupingDigitExtractor()
+        digitExtractor = AggregatingBoxGroupingDigitExtractor()
 
         digitDetectionTracker = BoxedObjectTracker(
             xyxyBoxAccessor=lambda d: d.xyxyBoxInImage,
@@ -156,13 +158,11 @@ class PrototypeApp:
         prevFrameGray = None
 
         framePathId = 4
-        detectionPerFrames = []
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
             if framePos % 20 == 0:
                 print("framePos", framePos)
 
             currentDetections = detector.detect(frameRgb).digitDetections
-            detectionPerFrames.append(currentDetections)
             trackedDetections = []
             if len(prevDetections) != 0:
                 trackedDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
@@ -175,13 +175,12 @@ class PrototypeApp:
             # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
             #     break
 
-            # digitsAtPoints = digitExtractor.extract(prevDetections, -1)
-            # if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
-            #                         showAsCenters=False) == 'esc':
-            #     break
+            digitsAtPoints = digitExtractor.extract(prevDetections, -1)
+            if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
+                                    showAsCenters=False) == 'esc':
+                break
         print("framePos", framePos)
         # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
-        self.saveDetections(detectionPerFrames, f"digit_detections_frames_{framePathId}.pcl")
 
 
 PrototypeApp().run()
