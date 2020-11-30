@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 from trvo_utils.box_utils import xyxy2xywh
 
-from with_image_aligning.digits_extractors.rect import Rect
+from core.rect import Rect
 
 
 @dataclass

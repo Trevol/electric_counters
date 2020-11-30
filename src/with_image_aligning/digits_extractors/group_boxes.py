@@ -1,6 +1,6 @@
 from typing import List
 
-from with_image_aligning.digits_extractors.rect import Rect
+from core.rect import Rect
 
 
 def groupBoxes(boxes: List[Rect], scores, overlap_threshold):

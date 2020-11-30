@@ -1,8 +1,8 @@
 import numpy as np
 from trvo_utils.timer import timeit
 
+from core.rect import Rect
 from with_image_aligning.digits_extractors.group_boxes import groupBoxes
-from with_image_aligning.digits_extractors.rect import Rect
 
 
 def runTest():
