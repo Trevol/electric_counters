@@ -7,8 +7,10 @@ from trvo_utils import toInt_array
 from trvo_utils.box_utils import boxCenter
 from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import bgr2rgb
+from trvo_utils.timer import timeit
 from trvo_utils.viz_utils import make_bgr_colors
 
+from core.rect import Rect
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
 from detection.TwoStageDigitsDetectionResult import DigitDetection
 from detection.TwoStageDigitsDetector import TwoStageDigitsDetector
@@ -19,6 +21,7 @@ from with_image_aligning.digits_extractors.box_grouping_digit_extractor import B
 from with_image_aligning.digits_extractors.digit_at_point import DigitAtPoint
 from with_image_aligning.digit_renderer import DigitRenderer
 from with_image_aligning.frame_reader import FrameReader
+from with_image_aligning.types.aggregated_detections import AggregatedDetections
 
 
 class Draw:
@@ -68,7 +71,7 @@ class Draw:
 class Show:
     @staticmethod
     def digitDetections(frame, framePos,
-                        detections: List[DigitDetection],
+                        detections: List[AggregatedDetections],
                         digitsAtPoints: List[DigitAtPoint],
                         showAsCenters):
         detectionsImg = Draw.digitDetections(frame.copy(), detections, showAsCenters)
@@ -149,12 +152,12 @@ class PrototypeApp:
         digitExtractor = AggregatingBoxGroupingDigitExtractor()
 
         digitDetectionTracker = BoxedObjectTracker(
-            xyxyBoxAccessor=lambda d: d.xyxyBoxInImage,
-            nextObjectMaker=lambda prevDetection, xyxyBox: DigitDetection(prevDetection.digit, prevDetection.score,
-                                                                          xyxyBox)
+            xyxyBoxAccessor=lambda aggDet: aggDet.box.xyxy(),
+            nextObjectMaker=lambda prevAggDet, xyxyBox: AggregatedDetections(Rect.fromXyxy(xyxyBox), prevAggDet.score,
+                                                                             prevAggDet.digit_counts)
         )
 
-        prevDetections: List[DigitDetection] = []
+        prevDetections: List[AggregatedDetections] = []
         prevFrameGray = None
 
         framePathId = 4
@@ -162,23 +165,18 @@ class PrototypeApp:
             if framePos % 20 == 0:
                 print("framePos", framePos)
 
-            currentDetections = detector.detect(frameRgb).digitDetections
-            trackedDetections = []
-            if len(prevDetections) != 0:
-                trackedDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
+            with timeit("track_and_extract"):
+                currentDetections = detector.detect(frameRgb).digitDetections
+                if len(prevDetections) != 0:
+                    prevDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
 
-            prevDetections = trackedDetections + currentDetections
-            prevFrameGray = frameGray
+                digitsAtPoints, prevDetections = digitExtractor.extract(currentDetections, prevDetections, -1)
+                prevFrameGray = frameGray
 
-            # centers = digitExtractor.extractCenters_(prevDetections)
-            # print(framePos, len(centers))
-            # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
+            # if Show.digitDetections(frameBgr, framePos, currentDetections, digitsAtPoints,
+            #                         showAsCenters=False) == 'esc':
             #     break
 
-            digitsAtPoints = digitExtractor.extract(prevDetections, -1)
-            if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
-                                    showAsCenters=False) == 'esc':
-                break
         print("framePos", framePos)
         # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
 

@@ -1,8 +1,8 @@
 from itertools import groupby
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
 
 from trvo_utils.box_utils import xyxy2xywh, boxCenter
-from trvo_utils.iter_utils import groupBy
+from trvo_utils.iter_utils import groupBy, flatten
 from trvo_utils.timer import timeit
 
 from core.rect import Rect
@@ -34,6 +34,15 @@ class AggregatingBoxGroupingDigitExtractor:
         digitsCounts.extend(prevDigitsCounts)
         return boxes, scores, digitsCounts
 
+    @staticmethod
+    def merge(digitsCountsByBox: Iterable[List[DigitCount]]) -> List[DigitCount]:
+        result = []
+        for digit, digitCount_by_digit in groupBy(flatten(digitsCountsByBox),
+                                                  key=lambda dc: dc.digit):
+            cnt = sum(d.count for d in digitCount_by_digit)
+            result.append(DigitCount(digit, cnt))
+        return result
+
     def extract(self, currentDetections: List[DigitDetection], prevDetections: List[AggregatedDetections],
                 numOfObservations) -> Tuple[List[DigitAtPoint], List[AggregatedDetections]]:
         boxes, scores, digitsCounts = self._boxes_scores_digitsCounts(currentDetections, prevDetections)
@@ -42,25 +51,22 @@ class AggregatingBoxGroupingDigitExtractor:
             scores=scores,
             overlap_threshold=.04)
 
-        aggregatedDetections = []
-        digits = []
+        aggregatedDetections: List[AggregatedDetections] = []
+        for index, digitsCounts_by_index in groupBy(zip(groupIndices, digitsCounts),
+                                                    key=_index_accessor,
+                                                    groupSelect=lambda ix_digitsCounts: ix_digitsCounts[1]):
+            box = boxes[index]
+            score = scores[index]
+            digitsCounts = self.merge(digitsCounts_by_index)
+            aggregatedDetections.append(AggregatedDetections(box, score, digitsCounts))
 
-        # zip(groupIndices, detections).groupBy(key=ind_det=>ind_det.index, groupSelect=ind_det=>ind_det.detection)
-        for index, detections_by_index in groupBy(zip(groupIndices, detections),
-                                                  key=_index_accessor,
-                                                  groupSelect=lambda ix_det: ix_det[1]):
-            detections_by_index = list(detections_by_index)
-            if len(detections_by_index) < self.minBoxesInGroup:
+        digits: List[DigitAtPoint] = []
+        for aggDet in aggregatedDetections:
+            if aggDet.totalCount() < self.minBoxesInGroup:
                 continue
-            # detections.groupBy(d=>d.digit).select(gr=>gr.Count())
-            digit_count = groupBy(detections_by_index,
-                                  key=lambda d: d.digit,
-                                  groupAggregate=lambda det_by_digit: count(det_by_digit))
-            # digit with max count of detections
-            digit = max(digit_count, key=lambda dig_cnt: dig_cnt[1])[0]
-            xyxyBox = detections[index].xyxyBoxInImage
-            point = boxCenter(xyxyBox)
-            digits.append(DigitAtPoint(digit, point, xyxyBox))
+            digit = aggDet.digitWithMaxCount()
+            xyxyBox = aggDet.box.xyxy()
+            digits.append(DigitAtPoint(digit, boxCenter(xyxyBox), xyxyBox))
 
         return digits, aggregatedDetections
 

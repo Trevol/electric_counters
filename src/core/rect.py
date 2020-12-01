@@ -1,4 +1,11 @@
+from trvo_utils.box_utils import xyxy2xywh
+
+
 class Rect:
+    @classmethod
+    def fromXyxy(cls, xyxy):
+        return cls(xyxy2xywh(xyxy))
+
     def __init__(self, xywh):
         self.xywh = xywh
         self.x = xywh[0]
@@ -6,6 +13,9 @@ class Rect:
         self.w = xywh[2]
         self.h = xywh[3]
         self.area = self.w * self.h
+
+    def xyxy(self):
+        return [self.x, self.y, self.x + self.w, self.y + self.h]
 
     def intersection(self, rect):
         x1 = max(self.x, rect.x)

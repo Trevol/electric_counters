@@ -19,7 +19,7 @@ class BoxedObjectTracker:
 
         nextObjects = []
         for prevObject, box, boxStatus in zip(prevObjects, boxes, status):
-            if not boxStatus or self.isAbnormalTrack(prevObject.xyxyBoxInImage, box):
+            if not boxStatus or self.isAbnormalTrack(self.xyxyBoxAccessor(prevObject ), box):
                 continue
             nextObjects.append(self.nextObjectMaker(prevObject, box))
         return nextObjects

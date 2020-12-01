@@ -25,7 +25,7 @@ def main():
         print(frameNum)
         digitsAtPoints, aggregatedDetections = digitExtractor.extract(detections, aggregatedDetections,
                                                                       numOfObservations)
-    # showDigits(digitsAtPoints)
+        showDigits(digitsAtPoints)
 
 
 main()

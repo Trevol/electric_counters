@@ -35,4 +35,4 @@ def showDigits(digitsAtPoints: List[DigitAtPoint]):
         digitStr = str(digitAtPoint.digit)
         textPt = tuple(np.int32(digitAtPoint.point))
         cv2.putText(img, digitStr, textPt, fontFace, fontScale, 255, fontThickness)
-    imshowWait(img)
+    return imshowWait(img)

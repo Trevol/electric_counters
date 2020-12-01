@@ -7,6 +7,7 @@ from trvo_utils import toInt_array
 from trvo_utils.box_utils import boxCenter
 from trvo_utils.cv2gui_utils import imshowWait
 from trvo_utils.imutils import bgr2rgb
+from trvo_utils.timer import timeit
 from trvo_utils.viz_utils import make_bgr_colors
 
 from detection.DarknetOpencvDetector import DarknetOpencvDetector
@@ -156,32 +157,26 @@ class PrototypeApp:
         prevFrameGray = None
 
         framePathId = 4
-        detectionPerFrames = []
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
             if framePos % 20 == 0:
                 print("framePos", framePos)
 
             currentDetections = detector.detect(frameRgb).digitDetections
-            detectionPerFrames.append(currentDetections)
-            trackedDetections = []
-            if len(prevDetections) != 0:
-                trackedDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
 
-            prevDetections = trackedDetections + currentDetections
-            prevFrameGray = frameGray
+            with timeit("track_and_extract"):
+                trackedDetections = []
+                if len(prevDetections) != 0:
+                    trackedDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
 
-            # centers = digitExtractor.extractCenters_(prevDetections)
-            # print(framePos, len(centers))
-            # if Show.clustersCenters(frameBgr, framePos, centers) == 'esc':
-            #     break
+                prevDetections = trackedDetections + currentDetections
+                prevFrameGray = frameGray
+                digitsAtPoints = digitExtractor.extract(prevDetections, -1)
 
-            # digitsAtPoints = digitExtractor.extract(prevDetections, -1)
             # if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
             #                         showAsCenters=False) == 'esc':
             #     break
         print("framePos", framePos)
         # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
-        self.saveDetections(detectionPerFrames, f"digit_detections_frames_{framePathId}.pcl")
 
 
 PrototypeApp().run()
