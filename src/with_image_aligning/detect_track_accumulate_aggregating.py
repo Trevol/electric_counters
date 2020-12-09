@@ -1,3 +1,4 @@
+import time
 from typing import List
 
 import cv2
@@ -160,25 +161,33 @@ class PrototypeApp:
         prevDetections: List[AggregatedDetections] = []
         prevFrameGray = None
 
-        framePathId = 4
+        framePathId = 1
         for framePos, frameBgr, frameRgb, frameGray in self.frames(framesPath.format(framePathId)):
             if framePos % 20 == 0:
                 print("framePos", framePos)
 
-            with timeit("track_and_extract"):
-                currentDetections = detector.detect(frameRgb).digitDetections
-                if len(prevDetections) != 0:
-                    prevDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
+            currentDetections = detector.detect(frameRgb).digitDetections
 
-                digitsAtPoints, prevDetections = digitExtractor.extract(currentDetections, prevDetections, -1)
-                prevFrameGray = frameGray
+            if len(prevDetections) != 0:
+                prevDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
+
+            digitsAtPoints, prevDetections = digitExtractor.extract(currentDetections, prevDetections, -1)
+            prevFrameGray = frameGray
 
             # if Show.digitDetections(frameBgr, framePos, currentDetections, digitsAtPoints,
             #                         showAsCenters=False) == 'esc':
             #     break
 
+            if self.show_agg_detections(frameBgr, prevDetections) == 'esc':
+                break
+
         print("framePos", framePos)
-        # self.saveDetections(prevDetections, f"digit_detections_{framePathId}.pcl")
+
+    def show_agg_detections(self, bgrFrame, detections: List[AggregatedDetections]):
+        for d in detections:
+            Draw.rectangle(bgrFrame, d.box.xyxy(), (0, 255, 0))
+        if imshowWait(bgrFrame) == 27:
+            return 'esc'
 
 
 PrototypeApp().run()

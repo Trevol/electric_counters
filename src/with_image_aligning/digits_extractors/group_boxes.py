@@ -59,20 +59,3 @@ def getMaxScoreIndex(scores, threshold):
 def getSortedScoreIndex(scores):
     score_index = ((score, index) for index, score in enumerate(scores))
     return sorted(score_index, key=_score_accessor, reverse=True)
-
-
-def ___NMSBoxes(bboxes, scores, score_threshold, nms_threshold):
-    assert len(bboxes) == len(scores) and score_threshold >= 0 and nms_threshold >= 0
-    score_index_vec = getMaxScoreIndex(scores, score_threshold)
-    bboxes = [Rect(b) for b in bboxes]
-    indexes = []
-    for _, index in score_index_vec:
-        keep = True
-        for keptIndex in indexes:
-            if not keep:
-                break
-            overlap = bboxes[index].overlap(bboxes[keptIndex])
-            keep = overlap <= nms_threshold
-        if keep:
-            indexes.append(index)
-    return indexes
