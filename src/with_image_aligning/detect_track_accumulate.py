@@ -163,14 +163,13 @@ class PrototypeApp:
 
             currentDetections = detector.detect(frameRgb).digitDetections
 
-            with timeit("track_and_extract"):
-                trackedDetections = []
-                if len(prevDetections) != 0:
-                    trackedDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
+            trackedDetections = []
+            if len(prevDetections) != 0:
+                trackedDetections = digitDetectionTracker.track(prevFrameGray, frameGray, prevDetections)
 
-                prevDetections = trackedDetections + currentDetections
-                prevFrameGray = frameGray
-                digitsAtPoints = digitExtractor.extract(prevDetections, -1)
+            prevDetections = trackedDetections + currentDetections
+            prevFrameGray = frameGray
+            digitsAtPoints = digitExtractor.extract(prevDetections, -1)
 
             # if Show.digitDetections(frameBgr, framePos, prevDetections, digitsAtPoints,
             #                         showAsCenters=False) == 'esc':
