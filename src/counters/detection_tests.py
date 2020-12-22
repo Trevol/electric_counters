@@ -64,6 +64,6 @@ def test_convert_pt_to_weights():
     from ultralytics_yolo.models import convert
 
     cfg_file = 'data/yolov3-tiny-2cls-320.cfg'
-    weights_file = 'best_weights/yolov3-tiny-2cls/320/2/best___.pt'
+    weights_file = 'best_weights/yolov3-tiny-2cls/320/4_no_local_counters/best_4.pt'
 
     convert(cfg_file, weights_file)
