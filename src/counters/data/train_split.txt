@@ -44,13 +44,3 @@
 /hdd/Datasets/counters/data/Musson_counters/000029.jpg
 /hdd/Datasets/counters/data/Musson_counters/000042.jpg
 /hdd/Datasets/counters/data/Musson_counters/000045.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000001.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000003.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000006.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000010.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000014.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000021.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000025.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000029.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000042.jpg
-/hdd/Datasets/counters/data/Musson_counters/val/000045.jpg
